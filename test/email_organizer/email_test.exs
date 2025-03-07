@@ -4,9 +4,12 @@ defmodule EmailOrganizer.EmailTest do
   """
 
   use EmailOrganizer.DataCase, async: true
+  use Mimic
 
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Category
+  alias EmailOrganizer.Email.Subscription
+  alias EmailOrganizer.Google.Gmail
 
   describe "categories" do
     @invalid_attrs %{name: nil, description: nil}

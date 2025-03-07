@@ -5,7 +5,12 @@ defmodule EmailOrganizer.Email do
 
   import Ecto.Query, warn: false
 
+  require Logger
+
+  alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
+  alias EmailOrganizer.Email.Subscription
+  alias EmailOrganizer.Google.Gmail
   alias EmailOrganizer.Repo
 
   @doc """

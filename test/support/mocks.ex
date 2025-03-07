@@ -4,6 +4,7 @@ defmodule EmailOrganizer.Support.Mocks do
   """
 
   def mimic_copy do
+    Mimic.copy(EmailOrganizer.Google.Gmail)
     Mimic.copy(GoogleApi.Gmail.V1.Connection)
     Mimic.copy(GoogleApi.Gmail.V1.Api.Users)
   end

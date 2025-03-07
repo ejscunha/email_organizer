@@ -7,6 +7,7 @@ defmodule EmailOrganizer.Support.Factory do
 
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
+  alias EmailOrganizer.Email.Subscription
 
   def user_factory do
     %User{
