@@ -29,6 +29,7 @@ defmodule EmailOrganizer.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.10"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
+      {:ex_machina, "~> 2.8", only: :test},
       {:floki, ">= 0.30.0", only: :test},
       {:heroicons,
        github: "tailwindlabs/heroicons",

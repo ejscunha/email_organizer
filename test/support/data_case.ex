@@ -24,6 +24,7 @@ defmodule EmailOrganizer.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import EmailOrganizer.DataCase
+      import EmailOrganizer.Support.Factory
     end
   end
 

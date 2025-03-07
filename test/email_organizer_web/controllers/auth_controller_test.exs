@@ -3,7 +3,7 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
   Test suite for the AuthController.
   """
 
-  use EmailOrganizerWeb.ConnCase
+  use EmailOrganizerWeb.ConnCase, async: true
 
   alias Phoenix.Flash
 
