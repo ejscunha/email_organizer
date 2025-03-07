@@ -9,10 +9,12 @@ defmodule EmailOrganizer.Google.GmailTest do
   alias EmailOrganizer.Google.Gmail
   alias GoogleApi.Gmail.V1
   alias GoogleApi.Gmail.V1.Api
+  alias GoogleApi.Gmail.V1.Model.WatchRequest
 
   describe "subscribe_user_emails/1" do
     test "successfully subscribes to user emails" do
       connection = %Tesla.Client{}
+      watch_request = %WatchRequest{topicName: "projects/project/topics/topic"}
 
       expect(V1.Connection, :new, fn auth_token ->
         assert auth_token == "test_auth_token"
@@ -24,7 +26,7 @@ defmodule EmailOrganizer.Google.GmailTest do
         |> DateTime.add(3600)
         |> DateTime.truncate(:millisecond)
 
-      expect(Api.Users, :gmail_users_watch, fn ^connection, "me" ->
+      expect(Api.Users, :gmail_users_watch, fn ^connection, "me", body: ^watch_request ->
         {:ok,
          %{
            historyId: "test_history_id",
@@ -44,7 +46,7 @@ defmodule EmailOrganizer.Google.GmailTest do
     test "handles API error" do
       expect(V1.Connection, :new, fn _auth_token -> %Tesla.Client{} end)
 
-      expect(Api.Users, :gmail_users_watch, fn _connection, _user_id ->
+      expect(Api.Users, :gmail_users_watch, fn _connection, _user_id, _body ->
         {:error, %{status: 400, body: "Bad Request"}}
       end)
 

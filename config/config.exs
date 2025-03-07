@@ -9,7 +9,10 @@ import Config
 
 config :email_organizer,
   ecto_repos: [EmailOrganizer.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  pub_sub_project_id: {:system, "GOOGLE_CLOUD_PUBSUB_PROJECT_ID"},
+  pub_sub_topic: {:system, "GOOGLE_CLOUD_PUBSUB_TOPIC"},
+  pub_sub_subscription: {:system, "GOOGLE_CLOUD_PUBSUB_SUBSCRIPTION"}
 
 # Configures the endpoint
 config :email_organizer, EmailOrganizerWeb.Endpoint,

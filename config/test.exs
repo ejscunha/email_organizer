@@ -1,5 +1,10 @@
 import Config
 
+config :email_organizer,
+  pub_sub_project_id: "project",
+  pub_sub_topic: "topic",
+  pub_sub_subscription: "subscription"
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
