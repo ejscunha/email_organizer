@@ -6,6 +6,7 @@ defmodule EmailOrganizerWeb.AuthController do
   use EmailOrganizerWeb, :controller
 
   alias EmailOrganizer.Account
+  alias EmailOrganizer.SubscriptionManager
   alias Ueberauth.Auth
   alias Ueberauth.Strategy.Helpers
 
@@ -21,6 +22,8 @@ defmodule EmailOrganizerWeb.AuthController do
       |> extract_user_info()
       |> Account.upsert_user()
 
+    SubscriptionManager.subscribe_user_emails(user, auth.credentials.token)
+
     conn
     |> put_session(:user_id, user.id)
     |> put_flash(:info, "Successfully authenticated as #{user.name}")
@@ -35,7 +38,7 @@ defmodule EmailOrganizerWeb.AuthController do
 
   def logout(conn, _params) do
     conn
-    |> delete_session(:user)
+    |> configure_session(drop: true)
     |> render(:logout)
   end
 

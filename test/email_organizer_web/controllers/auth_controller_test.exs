@@ -4,7 +4,9 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
   """
 
   use EmailOrganizerWeb.ConnCase, async: true
+  use Mimic
 
+  alias EmailOrganizer.SubscriptionManager
   alias Phoenix.Flash
 
   defp mock_ueberauth_failure do
@@ -24,9 +26,16 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
     test "stores user in session and redirects to root path", %{conn: conn} do
       user = insert(:user)
 
+      expect(SubscriptionManager, :subscribe_user_emails, fn ^user, "test_auth_token" ->
+        :ok
+      end)
+
       conn =
         conn
         |> assign(:ueberauth_auth, %Ueberauth.Auth{
+          credentials: %{
+            token: "test_auth_token"
+          },
           info: %{
             name: user.name,
             email: user.email
