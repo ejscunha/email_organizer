@@ -25,6 +25,8 @@ config :email_organizer, EmailOrganizerWeb.Endpoint,
   secret_key_base: "gHVHIYOiqMpQbHTPZiy8jk/ZmrO31K95OEXGPJuqCy23V9WOU3aeYwxTf4s/8nyC",
   server: false
 
+config :email_organizer, :broadway, producer_module: Broadway.DummyProducer
+
 # Print only warnings and errors during test
 config :logger, level: :none
 

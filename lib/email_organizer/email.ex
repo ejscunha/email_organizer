@@ -165,4 +165,10 @@ defmodule EmailOrganizer.Email do
         :error
     end
   end
+
+  @spec process_email_notification(String.t(), String.t()) :: :ok | :error
+  def process_email_notification(email, email_id) do
+    Logger.info("Processing email notification", email: email, email_id: email_id)
+    :ok
+  end
 end

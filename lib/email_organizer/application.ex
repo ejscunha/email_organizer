@@ -9,6 +9,9 @@ defmodule EmailOrganizer.Application do
       EmailOrganizerWeb.Telemetry,
       EmailOrganizer.Repo,
       {Phoenix.PubSub, name: EmailOrganizer.PubSub},
+      {Goth, name: EmailOrganizer.Goth},
+      EmailOrganizer.Broadway,
+      EmailOrganizer.SubscriptionManager,
       EmailOrganizerWeb.Endpoint
     ]
 

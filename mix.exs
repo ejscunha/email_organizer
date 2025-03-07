@@ -26,6 +26,7 @@ defmodule EmailOrganizer.MixProject do
   defp deps do
     [
       {:bandit, "~> 1.5"},
+      {:broadway_cloud_pub_sub, "~> 0.9"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.10"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
