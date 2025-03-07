@@ -8,9 +8,11 @@ defmodule EmailOrganizerWeb.PageControllerTest do
   alias Plug.Conn
 
   test "GET /", %{conn: conn} do
+    user = insert(:user)
+
     conn =
       conn
-      |> Conn.put_session(:user, %{name: "Test User", email: "test@example.com"})
+      |> Conn.put_session(:user_id, user.id)
       |> get(~p"/")
 
     assert html_response(conn, 200) =~ "TODO"

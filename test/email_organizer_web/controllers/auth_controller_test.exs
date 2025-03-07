@@ -7,15 +7,6 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
 
   alias Phoenix.Flash
 
-  defp mock_ueberauth_auth do
-    %Ueberauth.Auth{
-      info: %{
-        name: "Test User",
-        email: "test@example.com"
-      }
-    }
-  end
-
   defp mock_ueberauth_failure do
     %Ueberauth.Failure{
       errors: [%Ueberauth.Failure.Error{message: "Failed to authenticate"}]
@@ -31,17 +22,21 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
 
   describe "callback/2 with successful authentication" do
     test "stores user in session and redirects to root path", %{conn: conn} do
+      user = insert(:user)
+
       conn =
         conn
-        |> assign(:ueberauth_auth, mock_ueberauth_auth())
+        |> assign(:ueberauth_auth, %Ueberauth.Auth{
+          info: %{
+            name: user.name,
+            email: user.email
+          }
+        })
         |> get(~p"/auth/google/callback")
 
-      assert get_session(conn, :user) == %{
-               name: "Test User",
-               email: "test@example.com"
-             }
+      assert get_session(conn, :user_id) == user.id
 
-      assert Flash.get(conn.assigns.flash, :info) =~ "Successfully authenticated as Test User"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Successfully authenticated as #{user.name}"
 
       assert redirected_to(conn) == "/"
     end

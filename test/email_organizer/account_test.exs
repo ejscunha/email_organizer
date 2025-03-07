@@ -56,5 +56,16 @@ defmodule EmailOrganizer.AccountTest do
       user = build(:user)
       assert %Ecto.Changeset{} = Account.change_user(user)
     end
+
+    test "upsert_user/1 upserts a user" do
+      assert {:ok, %User{email: "test@example.com", name: "Test User"} = user} =
+               Account.upsert_user(%{email: "test@example.com", name: "Test User"})
+
+      assert {:ok, %User{email: "test@example.com", name: "Test User 2"}} =
+               Account.upsert_user(%{email: "test@example.com", name: "Test User 2"})
+
+      assert %User{email: "test@example.com", name: "Test User 2"} =
+               Account.get_user!(user.id)
+    end
   end
 end

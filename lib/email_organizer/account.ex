@@ -101,4 +101,22 @@ defmodule EmailOrganizer.Account do
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
+
+  @doc """
+  Upserts a user.
+
+  ## Examples
+
+      iex> upsert_user(%{name: "name", email: "email@example.com"})
+      {:ok, %User{name: "name", email: "email@example.com"}}
+
+      iex> upsert_user(%{email: nil})
+      {:error, %Ecto.Changeset{}}
+  """
+  @spec upsert_user(map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_user(params) do
+    params
+    |> User.changeset()
+    |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:name]})
+  end
 end

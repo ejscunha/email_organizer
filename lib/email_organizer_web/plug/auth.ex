@@ -6,6 +6,8 @@ defmodule EmailOrganizerWeb.Plug.Auth do
   import Phoenix.Controller
   import Plug.Conn
 
+  alias EmailOrganizer.Account
+
   @behaviour Plug
 
   def init(opts) do
@@ -13,7 +15,7 @@ defmodule EmailOrganizerWeb.Plug.Auth do
   end
 
   def call(conn, _opts) do
-    case get_session(conn, :user, :not_found) do
+    case get_session(conn, :user_id, :not_found) do
       :not_found ->
         query_string = if conn.query_string != "", do: "?#{conn.query_string}", else: ""
         current_path = "#{conn.request_path}#{query_string}"
@@ -23,7 +25,8 @@ defmodule EmailOrganizerWeb.Plug.Auth do
         |> redirect(to: "/auth/google")
         |> halt()
 
-      user ->
+      user_id ->
+        user = Account.get_user!(user_id)
         assign(conn, :current_user, user)
     end
   end

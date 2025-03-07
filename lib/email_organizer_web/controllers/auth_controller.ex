@@ -5,6 +5,7 @@ defmodule EmailOrganizerWeb.AuthController do
 
   use EmailOrganizerWeb, :controller
 
+  alias EmailOrganizer.Account
   alias Ueberauth.Auth
   alias Ueberauth.Strategy.Helpers
 
@@ -15,11 +16,14 @@ defmodule EmailOrganizerWeb.AuthController do
   end
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
-    user_info = extract_user_info(auth)
+    {:ok, user} =
+      auth
+      |> extract_user_info()
+      |> Account.upsert_user()
 
     conn
-    |> put_session(:user, user_info)
-    |> put_flash(:info, "Successfully authenticated as #{user_info.name}")
+    |> put_session(:user_id, user.id)
+    |> put_flash(:info, "Successfully authenticated as #{user.name}")
     |> redirect(to: "/")
   end
 
