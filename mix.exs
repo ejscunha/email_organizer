@@ -46,7 +46,8 @@ defmodule EmailOrganizer.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+      {:ueberauth_google, "~> 0.10"}
     ]
   end
 

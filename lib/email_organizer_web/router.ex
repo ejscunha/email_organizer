@@ -10,14 +10,27 @@ defmodule EmailOrganizerWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :auth do
+    plug EmailOrganizerWeb.Plug.Auth
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", EmailOrganizerWeb do
-    pipe_through :browser
+    pipe_through [:browser, :auth]
 
     get "/", PageController, :home
+  end
+
+  scope "/auth", EmailOrganizerWeb do
+    pipe_through :browser
+
+    get "/google", AuthController, :request
+    get "/google/callback", AuthController, :callback
+    get "/logout", AuthController, :logout
+    get "/failed", AuthController, :failed
   end
 
   # Other scopes may use custom stacks.

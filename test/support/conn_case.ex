@@ -17,6 +17,9 @@ defmodule EmailOrganizerWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias EmailOrganizer.DataCase
+  alias Phoenix.ConnTest
+
   using do
     quote do
       # The default endpoint for testing
@@ -32,7 +35,7 @@ defmodule EmailOrganizerWeb.ConnCase do
   end
 
   setup tags do
-    EmailOrganizer.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    DataCase.setup_sandbox(tags)
+    {:ok, conn: ConnTest.build_conn() |> ConnTest.init_test_session(%{})}
   end
 end
