@@ -21,4 +21,11 @@ defmodule EmailOrganizer.Support.Factory do
       description: sequence(:description, &"Description #{&1}")
     }
   end
+
+  def subscription_factory do
+    %Subscription{
+      last_id: sequence(:last_id, & &1),
+      expires_at: DateTime.add(DateTime.utc_now(), 7, :day)
+    }
+  end
 end

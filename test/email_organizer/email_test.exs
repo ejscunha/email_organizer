@@ -68,4 +68,88 @@ defmodule EmailOrganizer.EmailTest do
       assert %Ecto.Changeset{} = Email.change_category(category)
     end
   end
+
+  describe "subscriptions" do
+    setup do
+      user = insert(:user)
+      {:ok, user: user}
+    end
+
+    test "upsert_subscription/1 with valid data creates a subscription", %{user: user} do
+      expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
+
+      valid_attrs = %{
+        last_id: 123,
+        expires_at: expires_at,
+        user_id: user.id
+      }
+
+      assert {:ok, %Subscription{} = subscription} = Email.upsert_subscription(valid_attrs)
+      assert subscription.last_id == 123
+      assert subscription.user_id == user.id
+      assert DateTime.compare(subscription.expires_at, expires_at) == :eq
+    end
+
+    test "upsert_subscription/1 with invalid data returns error changeset" do
+      invalid_attrs = %{last_id: nil, expires_at: nil, user_id: nil}
+      assert {:error, %Ecto.Changeset{}} = Email.upsert_subscription(invalid_attrs)
+    end
+
+    test "upsert_subscription/1 updates existing subscription", %{user: user} do
+      subscription = insert(:subscription, user: user)
+
+      new_expires_at = DateTime.add(DateTime.utc_now(), 14, :day)
+
+      {:ok, updated_subscription} =
+        Email.upsert_subscription(%{
+          last_id: 123,
+          expires_at: new_expires_at,
+          user_id: user.id
+        })
+
+      assert updated_subscription.id == subscription.id
+      assert updated_subscription.last_id == 123
+      assert DateTime.compare(updated_subscription.expires_at, new_expires_at) == :eq
+    end
+
+    test "get_subscription_by_user_id/1 returns subscription for existing user", %{user: user} do
+      subscription = insert(:subscription, user_id: user.id)
+
+      assert Email.get_subscription_by_user_id(user.id) == subscription
+    end
+
+    test "get_subscription_by_user_id/1 returns nil for non-existing user" do
+      assert Email.get_subscription_by_user_id(0) == nil
+    end
+
+    test "subscribe_user_emails/2 creates new subscription when none exists", %{user: user} do
+      expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
+
+      expect(Gmail, :subscribe_user_emails, fn "test_token" ->
+        {:ok, %{history_id: 123, expires_at: expires_at}}
+      end)
+
+      assert :ok = Email.subscribe_user_emails(user, "test_token")
+
+      subscription = Email.get_subscription_by_user_id(user.id)
+      assert subscription.last_id == 123
+      assert DateTime.compare(subscription.expires_at, expires_at) == :eq
+    end
+
+    test "subscribe_user_emails/2 returns :ok when subscription is still active", %{user: user} do
+      insert(:subscription, user: user, expires_at: DateTime.add(DateTime.utc_now(), 7, :day))
+
+      reject(Gmail, :subscribe_user_emails, 1)
+
+      assert :ok = Email.subscribe_user_emails(user, "test_token")
+    end
+
+    test "subscribe_user_emails/2 returns error when Gmail API fails", %{user: user} do
+      expect(Gmail, :subscribe_user_emails, fn _token ->
+        {:error, "API Error"}
+      end)
+
+      assert :error = Email.subscribe_user_emails(user, "test_token")
+    end
+  end
 end

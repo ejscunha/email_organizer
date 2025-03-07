@@ -9,7 +9,7 @@ defmodule EmailOrganizer.Account.User do
 
   alias Ecto.Changeset
   alias EmailOrganizer.Email.Category
-
+  alias EmailOrganizer.Email.Subscription
   @type t :: %__MODULE__{}
 
   schema "users" do
@@ -17,6 +17,7 @@ defmodule EmailOrganizer.Account.User do
     field :name, :string
 
     has_many :categories, Category
+    has_one :subscription, Subscription
 
     timestamps(type: :utc_datetime)
   end

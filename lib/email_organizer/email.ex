@@ -101,4 +101,63 @@ defmodule EmailOrganizer.Email do
   def change_category(%Category{} = category, attrs \\ %{}) do
     Category.changeset(category, attrs)
   end
+
+  @doc """
+  Upserts a user email subscription.
+
+  ## Examples
+
+      iex> upsert_subscription(%{last_id: 123, expires_at: DateTime.add(DateTime.utc_now(), 7, :day), user_id: 123})
+      {:ok, %Subscription{last_id: 123, user_id: 123}}
+
+      iex> upsert_subscription(%{last_id: nil})
+      {:error, %Ecto.Changeset{}}
+  """
+  @spec upsert_subscription(map()) :: {:ok, Subscription.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_subscription(params) do
+    params
+    |> Subscription.changeset()
+    |> Repo.insert(conflict_target: :user_id, on_conflict: {:replace, [:last_id, :expires_at]})
+  end
+
+  @doc """
+  Gets a subscription by user id.
+
+  ## Examples
+
+      iex> get_subscription_by_user_id(123)
+      %Subscription{}
+  """
+  @spec get_subscription_by_user_id(integer()) :: Subscription.t() | nil
+  def get_subscription_by_user_id(user_id) do
+    Repo.get_by(Subscription, user_id: user_id)
+  end
+
+  @spec subscribe_user_emails(User.t(), String.t()) :: :ok | :error
+  def subscribe_user_emails(user, auth_token) do
+    with %Subscription{} = subscription <- get_subscription_by_user_id(user.id),
+         true <- DateTime.after?(subscription.expires_at, DateTime.utc_now()) do
+      Logger.debug("User subscription is still active", user_id: user.id)
+      :ok
+    else
+      _other -> do_subscribe_user_emails(user, auth_token)
+    end
+  end
+
+  defp do_subscribe_user_emails(user, auth_token) do
+    with {:ok, susbscribe_response} <- Gmail.subscribe_user_emails(auth_token),
+         {:ok, _subscription} <-
+           upsert_subscription(%{
+             last_id: susbscribe_response.history_id,
+             expires_at: susbscribe_response.expires_at,
+             user_id: user.id
+           }) do
+      Logger.info("Subscribed to user emails", user_id: user.id)
+      :ok
+    else
+      {:error, reason} ->
+        Logger.error("Error subscribing to user emails", reason: inspect(reason))
+        :error
+    end
+  end
 end
