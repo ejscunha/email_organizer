@@ -8,12 +8,15 @@ defmodule EmailOrganizer.Account.User do
   import Ecto.Changeset
 
   alias Ecto.Changeset
+  alias EmailOrganizer.Email.Category
 
   @type t :: %__MODULE__{}
 
   schema "users" do
     field :email, :string
     field :name, :string
+
+    has_many :categories, Category
 
     timestamps(type: :utc_datetime)
   end
