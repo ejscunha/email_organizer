@@ -12,9 +12,11 @@ defmodule EmailOrganizer.Google.GmailTest do
 
   describe "subscribe_user_emails/1" do
     test "successfully subscribes to user emails" do
+      connection = %Tesla.Client{}
+
       expect(V1.Connection, :new, fn auth_token ->
         assert auth_token == "test_auth_token"
-        :mocked_connection
+        connection
       end)
 
       expires_at =
@@ -22,10 +24,7 @@ defmodule EmailOrganizer.Google.GmailTest do
         |> DateTime.add(3600)
         |> DateTime.truncate(:millisecond)
 
-      expect(Api.Users, :gmail_users_watch, fn connection, user_id ->
-        assert connection == :mocked_connection
-        assert user_id == "me"
-
+      expect(Api.Users, :gmail_users_watch, fn ^connection, "me" ->
         {:ok,
          %{
            historyId: "test_history_id",
@@ -43,7 +42,7 @@ defmodule EmailOrganizer.Google.GmailTest do
     end
 
     test "handles API error" do
-      expect(V1.Connection, :new, fn _auth_token -> :mocked_connection end)
+      expect(V1.Connection, :new, fn _auth_token -> %Tesla.Client{} end)
 
       expect(Api.Users, :gmail_users_watch, fn _connection, _user_id ->
         {:error, %{status: 400, body: "Bad Request"}}
