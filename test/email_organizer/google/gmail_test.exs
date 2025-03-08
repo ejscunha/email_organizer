@@ -14,7 +14,11 @@ defmodule EmailOrganizer.Google.GmailTest do
   describe "subscribe_user_emails/1" do
     test "successfully subscribes to user emails" do
       connection = %Tesla.Client{}
-      watch_request = %WatchRequest{topicName: "projects/project/topics/topic"}
+
+      watch_request = %WatchRequest{
+        topicName: "projects/project/topics/topic",
+        labelIds: ["INBOX"]
+      }
 
       expect(V1.Connection, :new, fn auth_token ->
         assert auth_token == "test_auth_token"
@@ -68,7 +72,10 @@ defmodule EmailOrganizer.Google.GmailTest do
 
       expect(Api.Users, :gmail_users_history_list, fn ^connection,
                                                       "me",
-                                                      [startHistoryId: ^history_id] ->
+                                                      [
+                                                        startHistoryId: ^history_id,
+                                                        labelId: "INBOX"
+                                                      ] ->
         {:ok,
          %{
            historyId: 67_890,
@@ -106,7 +113,10 @@ defmodule EmailOrganizer.Google.GmailTest do
 
       expect(Api.Users, :gmail_users_history_list, fn ^connection,
                                                       "me",
-                                                      [startHistoryId: ^history_id] ->
+                                                      [
+                                                        startHistoryId: ^history_id,
+                                                        labelId: "INBOX"
+                                                      ] ->
         {:ok,
          %{
            historyId: 67_890,
@@ -223,7 +233,7 @@ defmodule EmailOrganizer.Google.GmailTest do
 
       result = Gmail.get_message("test_auth_token", message_id)
 
-      assert {:error, :error_decoding_message} = result
+      assert {:error, {:parsing_error, :decoding_message}} = result
     end
   end
 end

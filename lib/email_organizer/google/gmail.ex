@@ -37,7 +37,7 @@ defmodule EmailOrganizer.Google.Gmail do
   @spec subscribe_user_emails(String.t()) :: {:ok, subscribe_response()} | {:error, any()}
   def subscribe_user_emails(auth_token) do
     connection = V1.Connection.new(auth_token)
-    watch_request = %WatchRequest{topicName: get_topic_name()}
+    watch_request = %WatchRequest{topicName: get_topic_name(), labelIds: ["INBOX"]}
 
     with {:ok, response} <- Api.Users.gmail_users_watch(connection, "me", body: watch_request) do
       {:ok,
@@ -54,7 +54,12 @@ defmodule EmailOrganizer.Google.Gmail do
     connection = V1.Connection.new(auth_token)
 
     with {:ok, response} <-
-           Api.Users.gmail_users_history_list(connection, "me", startHistoryId: history_id) do
+           Api.Users.gmail_users_history_list(
+             connection,
+             "me",
+             startHistoryId: history_id,
+             labelId: "INBOX"
+           ) do
       message_ids =
         response.history
         |> Enum.flat_map(fn history ->
@@ -98,10 +103,10 @@ defmodule EmailOrganizer.Google.Gmail do
         {:ok, Mail.parse(message)}
 
       :error ->
-        {:error, :error_decoding_message}
+        {:error, {:parsing_error, :decoding_message}}
     end
   rescue
-    exception -> {:error, exception}
+    exception -> {:error, {:parsing_error, exception}}
   end
 
   defp get_message_text(message) do
