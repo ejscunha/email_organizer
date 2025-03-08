@@ -120,7 +120,7 @@ defmodule EmailOrganizer.Google.GmailTest do
         {:ok,
          %{
            historyId: 67_890,
-           history: []
+           history: nil
          }}
       end)
 

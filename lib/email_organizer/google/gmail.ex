@@ -54,22 +54,15 @@ defmodule EmailOrganizer.Google.Gmail do
   def list_history(auth_token, history_id) do
     connection = V1.Connection.new(auth_token)
 
-    with {:ok, response} <-
+    with {:ok, %{history: history, historyId: history_id}} <-
            Api.Users.gmail_users_history_list(
              connection,
              "me",
              startHistoryId: history_id,
              labelId: "INBOX"
            ) do
-      message_ids =
-        response.history
-        |> Enum.flat_map(fn history ->
-          history.messages
-        end)
-        |> Enum.map(& &1.id)
-        |> Enum.uniq()
-
-      {:ok, %{new_history_id: response.historyId, message_ids: message_ids}}
+      message_ids = get_message_ids_from_history(history)
+      {:ok, %{new_history_id: history_id, message_ids: message_ids}}
     end
   end
 
@@ -97,6 +90,17 @@ defmodule EmailOrganizer.Google.Gmail do
 
   defp get_topic_name do
     "projects/#{Utils.get_config_value(@project_id)}/topics/#{Utils.get_config_value(@topic)}"
+  end
+
+  defp get_message_ids_from_history(nil), do: []
+
+  defp get_message_ids_from_history(history) do
+    history
+    |> Enum.flat_map(fn history ->
+      history.messages
+    end)
+    |> Enum.map(& &1.id)
+    |> Enum.uniq()
   end
 
   defp parse_message(raw) do
