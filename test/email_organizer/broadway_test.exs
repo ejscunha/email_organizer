@@ -4,7 +4,10 @@ defmodule EmailOrganizer.BroadwayTest do
   """
 
   use EmailOrganizer.DataCase, async: false
+  use Oban.Testing, repo: EmailOrganizer.Repo
   use Mimic
+
+  alias EmailOrganizer.Email.Jobs.CheckUserEmailHistory
 
   setup :set_mimic_global
 
@@ -14,17 +17,11 @@ defmodule EmailOrganizer.BroadwayTest do
       email_id = "1234567890"
       data = Jason.encode!(%{"emailAddress" => email, "historyId" => email_id})
 
-      test_pid = self()
-
-      expect(EmailOrganizer.Email, :process_email_notification, fn ^email, ^email_id ->
-        send(test_pid, {:email_notification, email, email_id})
-        :ok
-      end)
-
       ref = Broadway.test_message(EmailOrganizer.Broadway, data)
 
-      assert_receive {:email_notification, ^email, ^email_id}
       assert_receive {:ack, ^ref, [%{data: ^data}], []}
+
+      assert_enqueued(worker: CheckUserEmailHistory, args: %{email: email})
     end
   end
 end

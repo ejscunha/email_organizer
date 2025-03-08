@@ -33,6 +33,13 @@ defmodule EmailOrganizer.Support.Factory do
     }
   end
 
+  def history_factory do
+    %{
+      new_history_id: sequence(:new_history_id, & &1),
+      message_ids: ["message-1", "message-2", "message-3"]
+    }
+  end
+
   def message_factory do
     %{
       id: sequence(:id, &"message-#{&1}"),

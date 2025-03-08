@@ -8,7 +8,7 @@ defmodule EmailOrganizer.Broadway do
   require Logger
 
   alias Broadway.Message
-  alias EmailOrganizer.Email
+  alias EmailOrganizer.Email.Jobs.CheckUserEmailHistory
   alias EmailOrganizer.Utils
 
   @project_id Application.compile_env(:email_organizer, :pub_sub_project_id)
@@ -38,8 +38,8 @@ defmodule EmailOrganizer.Broadway do
     Logger.debug("Received message from Google Cloud PubSub", message: inspect(message))
 
     case Jason.decode(data) do
-      {:ok, %{"emailAddress" => email, "historyId" => email_id}} ->
-        Email.process_email_notification(email, email_id)
+      {:ok, %{"emailAddress" => email}} ->
+        CheckUserEmailHistory.enqueue!(email)
 
       {:error, reason} ->
         Logger.error("Failed to JSON decode Google Cloud PubSub message",

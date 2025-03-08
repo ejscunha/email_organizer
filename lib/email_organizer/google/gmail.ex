@@ -49,7 +49,7 @@ defmodule EmailOrganizer.Google.Gmail do
     end
   end
 
-  @spec list_history(String.t(), integer()) :: {:ok, list()} | {:error, any()}
+  @spec list_history(String.t(), integer()) :: {:ok, history_response()} | {:error, any()}
   def list_history(auth_token, history_id) do
     connection = V1.Connection.new(auth_token)
 
