@@ -8,6 +8,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
   use Mimic
 
   alias EmailOrganizer.Email.Jobs.ClassifyEmail
+  alias EmailOrganizer.LLM
 
   describe "enqueue!/1" do
     test "enqueues a job with the correct arguments" do
@@ -21,9 +22,50 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
   describe "perform/1" do
     test "classifies email successfully" do
       email_id = "123"
-      insert(:email, external_id: email_id)
+      user = insert(:user)
+      category = insert(:category)
+      email = insert(:email, external_id: email_id, summary: nil, user_id: user.id)
+
+      expect(LLM, :categorize_email, fn email ->
+        assert email.external_id == email_id
+        {:ok, %{category_id: category.id, summary: "Test Summary"}}
+      end)
 
       assert :ok = perform_job(ClassifyEmail, %{email_id: email_id})
+
+      email = EmailOrganizer.Repo.reload(email)
+
+      assert email.summary == "Test Summary"
+      assert email.category_id == category.id
+    end
+
+    test "returns error if email is not found" do
+      email_id = "123"
+      assert {:cancel, :email_not_found} = perform_job(ClassifyEmail, %{email_id: email_id})
+    end
+
+    test "returns error if email is fails to be classified" do
+      email_id = "123"
+      insert(:email, external_id: email_id)
+
+      expect(LLM, :categorize_email, fn email ->
+        assert email.external_id == email_id
+        {:error, :decoding_error}
+      end)
+
+      assert {:error, :decoding_error} = perform_job(ClassifyEmail, %{email_id: email_id})
+    end
+
+    test "returns error if email is fails to be upserted" do
+      email_id = "123"
+      insert(:email, external_id: email_id)
+
+      expect(LLM, :categorize_email, fn email ->
+        assert email.external_id == email_id
+        {:ok, %{category_id: 123, summary: "Test Summary"}}
+      end)
+
+      assert {:error, %Ecto.Changeset{}} = perform_job(ClassifyEmail, %{email_id: email_id})
     end
   end
 end

@@ -9,6 +9,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmail do
 
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Email, as: EmailRecord
+  alias EmailOrganizer.LLM
 
   @spec enqueue!(String.t()) :: Oban.Job.t()
   def enqueue!(email_id) do
@@ -21,8 +22,26 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmail do
   def perform(%Oban.Job{args: %{"email_id" => email_id}}) do
     Logger.info("Classifying email", email_id: email_id)
 
-    with %EmailRecord{} = _email <- Email.get_email_by_external_id(email_id) do
-      Logger.info("Email to beclassified", email_id: email_id)
+    with %EmailRecord{} = email <- Email.get_email_by_external_id(email_id),
+         {:ok, result} <- LLM.categorize_email(email),
+         {:ok, _email} <-
+           email
+           |> Map.from_struct()
+           |> Map.merge(%{
+             summary: result.summary,
+             category_id: result.category_id
+           })
+           |> Email.upsert_email() do
+      Logger.info("Email classified", email_id: email_id)
+      :ok
+    else
+      nil ->
+        Logger.error("Email not found", email_id: email_id)
+        {:cancel, :email_not_found}
+
+      {:error, reason} ->
+        Logger.error("Error classifying email", email_id: email_id, reason: reason)
+        {:error, reason}
     end
   end
 end
