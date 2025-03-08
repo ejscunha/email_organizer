@@ -206,7 +206,18 @@ defmodule EmailOrganizer.Email do
     |> Repo.insert(
       conflict_target: :external_id,
       on_conflict:
-        {:replace, [:from, :recipients, :subject, :text, :date, :summary, :user_id, :category_id]}
+        {:replace,
+         [
+           :from,
+           :recipients,
+           :subject,
+           :text,
+           :date,
+           :summary,
+           :label_ids,
+           :user_id,
+           :category_id
+         ]}
     )
   end
 

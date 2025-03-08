@@ -22,6 +22,7 @@ defmodule EmailOrganizer.Email.Email do
     field :html, :string
     field :date, :utc_datetime_usec
     field :summary, :string
+    field :label_ids, {:array, :string}
 
     belongs_to :category, Category
     belongs_to :user, User
@@ -43,6 +44,7 @@ defmodule EmailOrganizer.Email.Email do
       :html,
       :date,
       :summary,
+      :label_ids,
       :user_id,
       :category_id
     ])
