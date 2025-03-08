@@ -27,6 +27,8 @@ config :email_organizer, EmailOrganizerWeb.Endpoint,
 
 config :email_organizer, :broadway, producer_module: Broadway.DummyProducer
 
+config :email_organizer, Oban, testing: :manual
+
 # Print only warnings and errors during test
 config :logger, level: :none
 

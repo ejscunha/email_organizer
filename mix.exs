@@ -44,6 +44,7 @@ defmodule EmailOrganizer.MixProject do
       {:jason, "~> 1.2"},
       {:mail, github: "DockYard/elixir-mail", ref: "889b7b2"},
       {:mimic, "~> 1.11"},
+      {:oban, "~> 2.19"},
       {:phoenix, "~> 1.7.20"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},

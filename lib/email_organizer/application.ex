@@ -9,6 +9,7 @@ defmodule EmailOrganizer.Application do
       EmailOrganizerWeb.Telemetry,
       EmailOrganizer.Repo,
       {Phoenix.PubSub, name: EmailOrganizer.PubSub},
+      {Oban, Application.fetch_env!(:email_organizer, Oban)},
       {Goth, name: EmailOrganizer.Goth},
       EmailOrganizer.Broadway,
       EmailOrganizer.SubscriptionManager,

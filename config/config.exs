@@ -72,6 +72,10 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: {System, :get_env, ["GOOGLE_CLIENT_ID"]},
   client_secret: {System, :get_env, ["GOOGLE_CLIENT_SECRET"]}
 
+config :email_organizer, Oban,
+  repo: EmailOrganizer.Repo,
+  queues: []
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
