@@ -6,9 +6,12 @@ defmodule EmailOrganizer.Google.GmailTest do
   use ExUnit.Case, async: true
   use Mimic
 
+  import EmailOrganizer.Support.Factory
+
   alias EmailOrganizer.Google.Gmail
   alias GoogleApi.Gmail.V1
   alias GoogleApi.Gmail.V1.Api
+  alias GoogleApi.Gmail.V1.Model.ModifyMessageRequest
   alias GoogleApi.Gmail.V1.Model.WatchRequest
 
   describe "subscribe_user_emails/1" do
@@ -234,6 +237,43 @@ defmodule EmailOrganizer.Google.GmailTest do
       result = Gmail.get_message("test_auth_token", message_id)
 
       assert {:error, {:parsing_error, :decoding_message}} = result
+    end
+  end
+
+  describe "archive_email/3" do
+    test "successfully archives an email" do
+      connection = %Tesla.Client{}
+      message_id = "msg123"
+      label_ids = ["INBOX"]
+      body = %ModifyMessageRequest{removeLabelIds: label_ids}
+
+      expect(V1.Connection, :new, fn auth_token ->
+        assert auth_token == "test_auth_token"
+        connection
+      end)
+
+      expect(Api.Users, :gmail_users_messages_modify, fn ^connection,
+                                                         "me",
+                                                         ^message_id,
+                                                         body: ^body ->
+        {:ok, build(:message, id: message_id)}
+      end)
+
+      assert :ok = Gmail.archive_email("test_auth_token", message_id, label_ids)
+    end
+
+    test "handles API error" do
+      expect(V1.Connection, :new, fn _auth_token -> %Tesla.Client{} end)
+
+      expect(Api.Users, :gmail_users_messages_modify, fn _connection,
+                                                         _user_id,
+                                                         _message_id,
+                                                         _body ->
+        {:error, %{status: 400, body: "Bad Request"}}
+      end)
+
+      assert {:error, %{status: 400, body: "Bad Request"}} =
+               Gmail.archive_email("test_auth_token", "msg123", ["INBOX"])
     end
   end
 end

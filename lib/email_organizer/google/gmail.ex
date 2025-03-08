@@ -6,6 +6,7 @@ defmodule EmailOrganizer.Google.Gmail do
   alias EmailOrganizer.Utils
   alias GoogleApi.Gmail.V1
   alias GoogleApi.Gmail.V1.Api
+  alias GoogleApi.Gmail.V1.Model.ModifyMessageRequest
   alias GoogleApi.Gmail.V1.Model.WatchRequest
 
   @type subscribe_response :: %{
@@ -85,6 +86,17 @@ defmodule EmailOrganizer.Google.Gmail do
          html: get_message_html(message),
          date: Mail.Message.get_header(message, "date")
        }}
+    end
+  end
+
+  @spec archive_email(String.t(), String.t(), [String.t()]) :: :ok | {:error, any()}
+  def archive_email(auth_token, id, label_ids) do
+    connection = V1.Connection.new(auth_token)
+    body = %ModifyMessageRequest{removeLabelIds: label_ids}
+
+    with {:ok, _response} <-
+           Api.Users.gmail_users_messages_modify(connection, "me", id, body: body) do
+      :ok
     end
   end
 
