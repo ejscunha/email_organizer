@@ -125,6 +125,21 @@ defmodule EmailOrganizer.EmailTest do
       assert Email.get_subscription_by_user_id(0) == nil
     end
 
+    test "update_subscription_last_id/2 updates the last_id of the subscription", %{user: user} do
+      subscription = insert(:subscription, user: user, last_id: 123)
+      new_last_id = 456
+
+      assert :ok = Email.update_subscription_last_id(subscription.id, new_last_id)
+      assert Repo.reload(subscription).last_id == new_last_id
+    end
+
+    test "update_subscription_last_id/2 returns :ok when no update is needed", %{user: user} do
+      subscription = insert(:subscription, user: user, last_id: 123)
+
+      assert :ok = Email.update_subscription_last_id(subscription.id, 123)
+      assert Repo.reload(subscription).last_id == 123
+    end
+
     test "subscribe_user_emails/1 creates new subscription when none exists", %{user: user} do
       auth_token = user.auth_token
       expires_at = DateTime.add(DateTime.utc_now(), 7, :day)

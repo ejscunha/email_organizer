@@ -138,6 +138,26 @@ defmodule EmailOrganizer.Email do
     Repo.get_by(Subscription, user_id: user_id)
   end
 
+  @spec update_subscription_last_id(integer(), integer()) :: :ok | {:error, any()}
+  def update_subscription_last_id(subscription_id, last_id) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.one(:subscription, where(Subscription, id: ^subscription_id))
+    |> Ecto.Multi.run(:update_last_id, fn repo, %{subscription: subscription} ->
+      if subscription.last_id < last_id do
+        subscription
+        |> Subscription.changeset(%{last_id: last_id})
+        |> repo.update()
+      else
+        {:ok, :no_update}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _changes} -> :ok
+      {:error, _name, reason, _changes} -> {:error, reason}
+    end
+  end
+
   @spec subscribe_user_emails(User.t()) :: :ok | :error
   def subscribe_user_emails(user) do
     with %Subscription{} = subscription <- get_subscription_by_user_id(user.id),
