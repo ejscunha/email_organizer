@@ -8,8 +8,8 @@ defmodule EmailOrganizer.EmailTest do
 
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Category
-  alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Email.Email, as: EmailRecord
+  alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Google.Gmail
 
   describe "categories" do

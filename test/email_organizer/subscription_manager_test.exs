@@ -6,8 +6,8 @@ defmodule EmailOrganizer.SubscriptionManagerTest do
   use EmailOrganizer.DataCase, async: true
   use Mimic
 
-  alias EmailOrganizer.SubscriptionManager
   alias EmailOrganizer.Email
+  alias EmailOrganizer.SubscriptionManager
 
   setup do
     pid = start_supervised!({SubscriptionManager, name: :subscription_manager})

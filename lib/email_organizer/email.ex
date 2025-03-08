@@ -10,8 +10,8 @@ defmodule EmailOrganizer.Email do
   alias Ecto.Changeset
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
-  alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Email.Email
+  alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Google.Gmail
   alias EmailOrganizer.Repo
 
