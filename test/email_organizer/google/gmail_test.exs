@@ -55,4 +55,84 @@ defmodule EmailOrganizer.Google.GmailTest do
       assert {:error, %{status: 400, body: "Bad Request"}} = result
     end
   end
+
+  describe "list_history/2" do
+    test "successfully retrieves history with messages" do
+      connection = %Tesla.Client{}
+      history_id = 12_345
+
+      expect(V1.Connection, :new, fn auth_token ->
+        assert auth_token == "test_auth_token"
+        connection
+      end)
+
+      expect(Api.Users, :gmail_users_history_list, fn ^connection,
+                                                      "me",
+                                                      [startHistoryId: ^history_id] ->
+        {:ok,
+         %{
+           historyId: 67_890,
+           history: [
+             %{
+               messages: [
+                 %{id: "msg1"},
+                 %{id: "msg2"}
+               ]
+             },
+             %{
+               messages: [
+                 %{id: "msg2"},
+                 %{id: "msg3"}
+               ]
+             }
+           ]
+         }}
+      end)
+
+      result = Gmail.list_history("test_auth_token", history_id)
+
+      assert {:ok,
+              %{
+                new_history_id: 67_890,
+                message_ids: ["msg1", "msg2", "msg3"]
+              }} = result
+    end
+
+    test "successfully retrieves history with no messages" do
+      connection = %Tesla.Client{}
+      history_id = 12_345
+
+      expect(V1.Connection, :new, fn _auth_token -> connection end)
+
+      expect(Api.Users, :gmail_users_history_list, fn ^connection,
+                                                      "me",
+                                                      [startHistoryId: ^history_id] ->
+        {:ok,
+         %{
+           historyId: 67_890,
+           history: []
+         }}
+      end)
+
+      result = Gmail.list_history("test_auth_token", history_id)
+
+      assert {:ok,
+              %{
+                new_history_id: 67_890,
+                message_ids: []
+              }} = result
+    end
+
+    test "handles API error" do
+      expect(V1.Connection, :new, fn _auth_token -> %Tesla.Client{} end)
+
+      expect(Api.Users, :gmail_users_history_list, fn _connection, _user_id, _opts ->
+        {:error, %{status: 400, body: "Bad Request"}}
+      end)
+
+      result = Gmail.list_history("test_auth_token", 12_345)
+
+      assert {:error, %{status: 400, body: "Bad Request"}} = result
+    end
+  end
 end

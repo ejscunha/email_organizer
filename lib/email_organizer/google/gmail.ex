@@ -13,6 +13,11 @@ defmodule EmailOrganizer.Google.Gmail do
           expires_at: DateTime.t()
         }
 
+  @type history_response :: %{
+          new_history_id: integer(),
+          message_ids: [String.t()]
+        }
+
   @project_id Application.compile_env(:email_organizer, :pub_sub_project_id)
   @topic Application.compile_env(:email_organizer, :pub_sub_topic)
 
@@ -28,6 +33,24 @@ defmodule EmailOrganizer.Google.Gmail do
          expires_at:
            response.expiration |> String.to_integer() |> DateTime.from_unix!(:millisecond)
        }}
+    end
+  end
+
+  @spec list_history(String.t(), integer()) :: {:ok, list()} | {:error, any()}
+  def list_history(auth_token, history_id) do
+    connection = V1.Connection.new(auth_token)
+
+    with {:ok, response} <-
+           Api.Users.gmail_users_history_list(connection, "me", startHistoryId: history_id) do
+      message_ids =
+        response.history
+        |> Enum.flat_map(fn history ->
+          history.messages
+        end)
+        |> Enum.map(& &1.id)
+        |> Enum.uniq()
+
+      {:ok, %{new_history_id: response.historyId, message_ids: message_ids}}
     end
   end
 
