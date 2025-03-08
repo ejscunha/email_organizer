@@ -77,7 +77,8 @@ config :email_organizer, Oban,
   queues: [
     email_history: 10,
     email_fetch: 10,
-    email_classify: 10
+    email_classify: 10,
+    email_archive: 10
   ]
 
 config :langchain, :openai_key, fn -> System.fetch_env!("OPENAI_API_KEY") end
