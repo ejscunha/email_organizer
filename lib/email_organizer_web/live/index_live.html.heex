@@ -1,0 +1,64 @@
+<div class="bg-white shadow-md rounded-lg p-6 mb-8">
+  <div class="mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Your Categories</h2>
+        <.link
+          :if={not Enum.empty?(@categories)}
+          navigate={~p"/categories/new"}
+          class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center"
+        >
+          <.icon name="hero-plus-circle" class="h-5 w-5 mr-1" /> New Category
+        </.link>
+      </div>
+
+      <div :if={Enum.empty?(@categories)} class="text-center py-8">
+        <div class="text-gray-500 mb-4">You don't have any categories yet</div>
+        <.link
+          navigate={~p"/categories/new"}
+          class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium inline-flex items-center"
+        >
+          <.icon name="hero-plus-circle" class="h-5 w-5 mr-1" /> Create your first category
+        </.link>
+      </div>
+      <div
+        :if={not Enum.empty?(@categories)}
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <div
+          :for={category <- @categories}
+          class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-semibold text-gray-800">{category.name}</h3>
+            <div class="flex space-x-2">
+              <.link
+                navigate={~p"/categories/#{category.id}/edit"}
+                class="text-blue-600 hover:text-blue-800"
+              >
+                <.icon name="hero-pencil-square" class="h-5 w-5" />
+              </.link>
+              <button
+                phx-click="delete_category"
+                phx-value-id={category.id}
+                data-confirm="Are you sure you want to delete this category?"
+                class="text-red-600 hover:text-red-800"
+              >
+                <.icon name="hero-trash" class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mt-2">{category.description}</p>
+          <div class="mt-4">
+            <.link
+              navigate={~p"/categories/#{category.id}"}
+              class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              View emails →
+            </.link>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

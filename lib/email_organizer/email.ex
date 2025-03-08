@@ -29,6 +29,22 @@ defmodule EmailOrganizer.Email do
   end
 
   @doc """
+  Returns the list of categories for a specific user.
+
+  ## Examples
+
+      iex> list_categories_by_user(123)
+      [%Category{}, ...]
+
+  """
+  @spec list_categories_by_user(integer()) :: [Category.t()]
+  def list_categories_by_user(user_id) do
+    Category
+    |> where([c], c.user_id == ^user_id)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single category.
 
   Raises `Ecto.NoResultsError` if the Category does not exist.

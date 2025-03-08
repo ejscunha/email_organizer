@@ -65,6 +65,15 @@ defmodule EmailOrganizerWeb do
     end
   end
 
+  def live_mount do
+    quote do
+      import Phoenix.Component
+      import Phoenix.LiveView
+
+      unquote(verified_routes())
+    end
+  end
+
   def html do
     quote do
       use Phoenix.Component

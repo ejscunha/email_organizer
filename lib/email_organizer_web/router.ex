@@ -23,7 +23,14 @@ defmodule EmailOrganizerWeb.Router do
   scope "/", EmailOrganizerWeb do
     pipe_through [:browser, :auth]
 
-    get "/", PageController, :home
+    live_session :default,
+      on_mount: EmailOrganizerWeb.AuthMount,
+      layout: {EmailOrganizerWeb.Layouts, :app} do
+      live "/", IndexLive
+      live "/categories/new", CategoryLive.New
+      live "/categories/:id/edit", CategoryLive.Edit
+      live "/categories/:id", CategoryLive.Show
+    end
   end
 
   scope "/", Oban.Web do

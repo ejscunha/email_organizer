@@ -71,6 +71,12 @@ defmodule EmailOrganizer.EmailTest do
       category = insert(:category)
       assert %Ecto.Changeset{} = Email.change_category(category)
     end
+
+    test "list_categories_by_user/1 returns all categories for a user" do
+      user = insert(:user)
+      categories = insert_list(3, :category, user_id: user.id)
+      assert Email.list_categories_by_user(user.id) == categories
+    end
   end
 
   describe "subscriptions" do

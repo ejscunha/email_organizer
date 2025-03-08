@@ -1,0 +1,27 @@
+<div class="flex items-center mb-8">
+  <.link navigate={~p"/"} class="text-blue-600 hover:text-blue-800 flex items-center">
+    <.icon name="hero-arrow-left" class="h-5 w-5 mr-1" /> Back to index
+  </.link>
+</div>
+<div class="bg-white shadow-md rounded-lg p-6">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Category</h1>
+      <.form for={@form} id="category-form" phx-change="validate" phx-submit="save">
+        <div class="space-y-4">
+          <div>
+            <.input field={@form[:name]} type="text" label="Name" required />
+          </div>
+          <div>
+            <.input field={@form[:description]} type="textarea" label="Description" required />
+          </div>
+          <div class="flex justify-end pt-4">
+            <.button type="submit" phx-disable-with="Saving...">
+              Update Category
+            </.button>
+          </div>
+        </div>
+      </.form>
+    </div>
+  </div>
+</div>
