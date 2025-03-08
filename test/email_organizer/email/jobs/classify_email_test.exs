@@ -36,7 +36,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
 
       expect(LLM, :categorize_email, fn email ->
         assert email.external_id == email_id
-        {:ok, %{category_id: category.id, summary: "Test Summary"}}
+        {:ok, %{"category_id" => category.id, "summary" => "Test Summary"}}
       end)
 
       assert :ok = perform_job(ClassifyEmail, %{email_id: email_id})
@@ -73,7 +73,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
 
       expect(LLM, :categorize_email, fn email ->
         assert email.external_id == email_id
-        {:ok, %{category_id: 123, summary: "Test Summary"}}
+        {:ok, %{"category_id" => 123, "summary" => "Test Summary"}}
       end)
 
       assert {:error, %Ecto.Changeset{}} = perform_job(ClassifyEmail, %{email_id: email_id})

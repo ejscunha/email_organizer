@@ -31,8 +31,8 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmail do
            |> Map.from_struct()
            |> Map.merge(%{
              label_ids: [],
-             summary: result.summary,
-             category_id: result.category_id
+             summary: result["summary"],
+             category_id: result["category_id"]
            })
            |> Email.upsert_email() do
       Logger.info("Email classified", email_id: email_id)
