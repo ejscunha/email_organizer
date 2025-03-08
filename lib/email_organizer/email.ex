@@ -214,7 +214,6 @@ defmodule EmailOrganizer.Email do
            :text,
            :date,
            :summary,
-           :label_ids,
            :user_id,
            :category_id
          ]}

@@ -189,7 +189,6 @@ defmodule EmailOrganizer.EmailTest do
         html: "Test HTML",
         date: datetime,
         summary: "Test Summary",
-        label_ids: ["INBOX"],
         user_id: user.id,
         category_id: category.id
       }
@@ -203,7 +202,6 @@ defmodule EmailOrganizer.EmailTest do
       assert email.html == "Test HTML"
       assert email.date == datetime
       assert email.summary == "Test Summary"
-      assert email.label_ids == ["INBOX"]
       assert email.user_id == user.id
       assert email.category_id == category.id
     end
@@ -218,7 +216,6 @@ defmodule EmailOrganizer.EmailTest do
         html: nil,
         date: nil,
         summary: nil,
-        label_ids: nil,
         user_id: nil,
         category_id: nil
       }
