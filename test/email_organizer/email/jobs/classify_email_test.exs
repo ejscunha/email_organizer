@@ -7,6 +7,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
   use Oban.Testing, repo: EmailOrganizer.Repo
   use Mimic
 
+  alias EmailOrganizer.Email.Jobs.ArchiveEmail
   alias EmailOrganizer.Email.Jobs.ClassifyEmail
   alias EmailOrganizer.LLM
 
@@ -24,7 +25,14 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
       email_id = "123"
       user = insert(:user)
       category = insert(:category)
-      email = insert(:email, external_id: email_id, summary: nil, user_id: user.id)
+
+      email =
+        insert(:email,
+          external_id: email_id,
+          label_ids: ["INBOX"],
+          summary: nil,
+          user_id: user.id
+        )
 
       expect(LLM, :categorize_email, fn email ->
         assert email.external_id == email_id
@@ -35,6 +43,9 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
 
       email = EmailOrganizer.Repo.reload(email)
 
+      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id, label_ids: ["INBOX"]})
+
+      assert email.label_ids == []
       assert email.summary == "Test Summary"
       assert email.category_id == category.id
     end
