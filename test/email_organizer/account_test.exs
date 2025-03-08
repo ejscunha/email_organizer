@@ -21,6 +21,11 @@ defmodule EmailOrganizer.AccountTest do
       assert Account.get_user(user.id) == user
     end
 
+    test "get_user_by_email/1 returns the user with given email" do
+      user = insert(:user)
+      assert Account.get_user_by_email(user.email) == user
+    end
+
     test "create_user/1 with valid data creates a user" do
       valid_attrs = %{email: "test@example.com", name: "Test User"}
 
