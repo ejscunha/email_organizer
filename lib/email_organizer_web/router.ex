@@ -1,6 +1,8 @@
 defmodule EmailOrganizerWeb.Router do
   use EmailOrganizerWeb, :router
 
+  import Oban.Web.Router
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -22,6 +24,12 @@ defmodule EmailOrganizerWeb.Router do
     pipe_through [:browser, :auth]
 
     get "/", PageController, :home
+  end
+
+  scope "/", Oban.Web do
+    pipe_through :browser
+
+    oban_dashboard("/oban")
   end
 
   scope "/auth", EmailOrganizerWeb do
