@@ -9,7 +9,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistoryTest do
 
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Jobs.CheckUserEmailHistory
-  alias EmailOrganizer.Email.Jobs.ProcessEmail
+  alias EmailOrganizer.Email.Jobs.FetchEmail
   alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Google.Gmail
 
@@ -47,7 +47,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistoryTest do
 
       assert Enum.all?(message_ids, fn message_id ->
                assert_enqueued(
-                 worker: ProcessEmail,
+                 worker: FetchEmail,
                  args: %{user_id: user.id, email_id: message_id}
                )
              end)

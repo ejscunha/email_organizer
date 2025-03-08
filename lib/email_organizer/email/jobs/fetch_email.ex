@@ -1,14 +1,15 @@
-defmodule EmailOrganizer.Email.Jobs.ProcessEmail do
+defmodule EmailOrganizer.Email.Jobs.FetchEmail do
   @moduledoc """
-  A worker that processes an email.
+  A worker that fetches an email.
   """
 
-  use Oban.Worker, queue: :email_process
+  use Oban.Worker, queue: :email_fetch
 
   require Logger
 
   alias EmailOrganizer.Account
   alias EmailOrganizer.Account.User
+  alias EmailOrganizer.Email
   alias EmailOrganizer.Google.Gmail
 
   @spec enqueue!(User.t(), String.t()) :: Oban.Job.t()
@@ -20,11 +21,13 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmail do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"user_id" => user_id, "email_id" => email_id} = _args}) do
-    Logger.info("Processing email", user_id: user_id, email_id: email_id)
+    Logger.info("Fetching email", user_id: user_id, email_id: email_id)
 
     with %User{} = user <- Account.get_user(user_id),
-         {:ok, message} <- Gmail.get_message(user.auth_token, email_id) do
-      Logger.debug("Email to be processed", email: inspect(message))
+         {:ok, message} <- Gmail.get_message(user.auth_token, email_id),
+         Logger.info("Fetched email message", user_id: user_id, email_id: email_id),
+         email_attrs = Map.merge(message, %{user_id: user_id, external_id: email_id}),
+         {:ok, _email} <- Email.upsert_email(email_attrs) do
       :ok
     else
       nil ->
@@ -41,7 +44,7 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmail do
         {:cancel, :parsing_error}
 
       {:error, reason} ->
-        Logger.error("Error processing email",
+        Logger.error("Error getting email",
           user_id: user_id,
           email_id: email_id,
           reason: inspect(reason)

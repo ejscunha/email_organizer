@@ -10,7 +10,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistory do
   alias EmailOrganizer.Account
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email
-  alias EmailOrganizer.Email.Jobs.ProcessEmail
+  alias EmailOrganizer.Email.Jobs.FetchEmail
   alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Google.Gmail
 
@@ -36,7 +36,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistory do
          Logger.info("Found #{Enum.count(history.message_ids)} new email changes",
            user_id: user.id
          ),
-         :ok <- Enum.each(history.message_ids, &ProcessEmail.enqueue!(user, &1)),
+         :ok <- Enum.each(history.message_ids, &FetchEmail.enqueue!(user, &1)),
          :ok <- Email.update_subscription_last_id(subscription.id, history.new_history_id) do
       :ok
     else

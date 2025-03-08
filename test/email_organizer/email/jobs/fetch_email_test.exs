@@ -1,13 +1,15 @@
-defmodule EmailOrganizer.Email.Jobs.ProcessEmailTest do
+defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
   @moduledoc """
-  Test suite for the ProcessEmail job.
+  Test suite for the FetchEmail job.
   """
 
   use EmailOrganizer.DataCase, async: true
   use Oban.Testing, repo: EmailOrganizer.Repo
   use Mimic
 
-  alias EmailOrganizer.Email.Jobs.ProcessEmail
+  alias EmailOrganizer.Email
+  alias EmailOrganizer.Email.Email, as: EmailRecord
+  alias EmailOrganizer.Email.Jobs.FetchEmail
   alias EmailOrganizer.Google.Gmail
 
   setup do
@@ -18,14 +20,14 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmailTest do
 
   describe "enqueue!/2" do
     test "enqueues a job with the correct arguments", %{user: user, email_id: email_id} do
-      assert %Oban.Job{} = ProcessEmail.enqueue!(user, email_id)
+      assert %Oban.Job{} = FetchEmail.enqueue!(user, email_id)
 
-      assert_enqueued(worker: ProcessEmail, args: %{user_id: user.id, email_id: email_id})
+      assert_enqueued(worker: FetchEmail, args: %{user_id: user.id, email_id: email_id})
     end
   end
 
   describe "perform/1" do
-    test "processes email successfully", %{user: user, email_id: email_id} do
+    test "fetches email successfully", %{user: user, email_id: email_id} do
       expect(Gmail, :get_message, fn auth_token, id ->
         assert auth_token == user.auth_token
         assert id == email_id
@@ -34,15 +36,17 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmailTest do
       end)
 
       assert :ok =
-               perform_job(ProcessEmail, %{
+               perform_job(FetchEmail, %{
                  "user_id" => user.id,
                  "email_id" => email_id
                })
+
+      assert %EmailRecord{} = Email.get_email_by_external_id(email_id)
     end
 
     test "returns error when user not found", %{email_id: email_id} do
       assert {:cancel, :user_not_found} =
-               perform_job(ProcessEmail, %{
+               perform_job(FetchEmail, %{
                  "user_id" => 999,
                  "email_id" => email_id
                })
@@ -54,7 +58,7 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmailTest do
       end)
 
       assert {:error, "API Error"} =
-               perform_job(ProcessEmail, %{
+               perform_job(FetchEmail, %{
                  "user_id" => user.id,
                  "email_id" => email_id
                })
@@ -66,7 +70,7 @@ defmodule EmailOrganizer.Email.Jobs.ProcessEmailTest do
       end)
 
       assert {:cancel, :parsing_error} =
-               perform_job(ProcessEmail, %{
+               perform_job(FetchEmail, %{
                  "user_id" => user.id,
                  "email_id" => email_id
                })
