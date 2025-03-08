@@ -9,6 +9,7 @@ defmodule EmailOrganizer.EmailTest do
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Category
   alias EmailOrganizer.Email.Subscription
+  alias EmailOrganizer.Email.Email, as: EmailRecord
   alias EmailOrganizer.Google.Gmail
 
   describe "categories" do
@@ -169,6 +170,63 @@ defmodule EmailOrganizer.EmailTest do
       end)
 
       assert :error = Email.subscribe_user_emails(user)
+    end
+  end
+
+  describe "emails" do
+    test "upsert_email/1 with valid data creates an email" do
+      user = insert(:user)
+      category = insert(:category)
+
+      datetime = DateTime.utc_now()
+
+      email_attrs = %{
+        external_id: "123",
+        from: "test@example.com",
+        recipients: ["test@example.com"],
+        subject: "Test Subject",
+        text: "Test Text",
+        date: datetime,
+        summary: "Test Summary",
+        user_id: user.id,
+        category_id: category.id
+      }
+
+      assert {:ok, %EmailRecord{} = email} = Email.upsert_email(email_attrs)
+      assert email.external_id == "123"
+      assert email.from == "test@example.com"
+      assert email.recipients == ["test@example.com"]
+      assert email.subject == "Test Subject"
+      assert email.text == "Test Text"
+      assert email.date == datetime
+      assert email.summary == "Test Summary"
+      assert email.user_id == user.id
+      assert email.category_id == category.id
+    end
+
+    test "upsert_email/1 with invalid data returns error changeset" do
+      invalid_attrs = %{
+        external_id: nil,
+        from: nil,
+        recipients: nil,
+        subject: nil,
+        text: nil,
+        date: nil,
+        summary: nil,
+        user_id: nil,
+        category_id: nil
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Email.upsert_email(invalid_attrs)
+    end
+
+    test "get_email_by_external_id/1 returns the email with the given external id" do
+      email = insert(:email)
+      assert Email.get_email_by_external_id(email.external_id) == email
+    end
+
+    test "get_email_by_external_id/1 returns nil when the email does not exist" do
+      assert Email.get_email_by_external_id("nonexistent") == nil
     end
   end
 end

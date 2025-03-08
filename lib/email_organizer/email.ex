@@ -7,9 +7,11 @@ defmodule EmailOrganizer.Email do
 
   require Logger
 
+  alias Ecto.Changeset
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
   alias EmailOrganizer.Email.Subscription
+  alias EmailOrganizer.Email.Email
   alias EmailOrganizer.Google.Gmail
   alias EmailOrganizer.Repo
 
@@ -118,7 +120,7 @@ defmodule EmailOrganizer.Email do
       iex> upsert_subscription(%{last_id: nil})
       {:error, %Ecto.Changeset{}}
   """
-  @spec upsert_subscription(map()) :: {:ok, Subscription.t()} | {:error, Ecto.Changeset.t()}
+  @spec upsert_subscription(map()) :: {:ok, Subscription.t()} | {:error, Changeset.t()}
   def upsert_subscription(params) do
     params
     |> Subscription.changeset()
@@ -185,4 +187,40 @@ defmodule EmailOrganizer.Email do
         :error
     end
   end
+
+  @doc """
+  Upserts an email.
+
+  ## Examples
+
+      iex> upsert_email(%{field: value})
+      {:ok, %Email{}}
+
+      iex> upsert_email(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+  """
+  @spec upsert_email(map()) :: {:ok, Email.t()} | {:error, Changeset.t()}
+  def upsert_email(attrs \\ %{}) do
+    %Email{}
+    |> Email.changeset(attrs)
+    |> Repo.insert(
+      conflict_target: :external_id,
+      on_conflict:
+        {:replace, [:from, :recipients, :subject, :text, :date, :summary, :user_id, :category_id]}
+    )
+  end
+
+  @doc """
+  Gets an email by external id.
+
+  ## Examples
+
+      iex> get_email_by_external_id("123")
+      %Email{}
+
+      iex> get_email_by_external_id("456")
+      nil
+  """
+  @spec get_email_by_external_id(String.t()) :: Email.t() | nil
+  def get_email_by_external_id(external_id), do: Repo.get_by(Email, external_id: external_id)
 end

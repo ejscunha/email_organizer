@@ -8,6 +8,7 @@ defmodule EmailOrganizer.Support.Factory do
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
   alias EmailOrganizer.Email.Subscription
+  alias EmailOrganizer.Email.Email
 
   def user_factory do
     %User{
@@ -30,6 +31,18 @@ defmodule EmailOrganizer.Support.Factory do
     %Subscription{
       last_id: sequence(:last_id, & &1),
       expires_at: DateTime.add(DateTime.utc_now(), 7, :day)
+    }
+  end
+
+  def email_factory do
+    %Email{
+      external_id: sequence(:external_id, &"email-#{&1}"),
+      from: "test@example.com",
+      recipients: ["test@example.com"],
+      subject: "Test Email",
+      text: "This is a test email.",
+      date: ~U[2021-01-01 00:00:00Z],
+      summary: "Test Summary"
     }
   end
 
