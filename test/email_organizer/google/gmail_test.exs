@@ -135,4 +135,95 @@ defmodule EmailOrganizer.Google.GmailTest do
       assert {:error, %{status: 400, body: "Bad Request"}} = result
     end
   end
+
+  describe "get_message/2" do
+    test "successfully retrieves and parses a message" do
+      connection = %Tesla.Client{}
+      message_id = "msg123"
+
+      expect(V1.Connection, :new, fn auth_token ->
+        assert auth_token == "test_auth_token"
+        connection
+      end)
+
+      raw_email =
+        Mail.build()
+        |> Mail.put_from({"John Doe", "john@example.com"})
+        |> Mail.put_to({"Jane Smith", "jane@example.com"})
+        |> Mail.put_cc({"Bob Johnson", "bob@example.com"})
+        |> Mail.put_subject("Test Email")
+        |> Mail.put_text("Hello World!")
+        |> Mail.Message.put_header("date", ~U[2024-01-01 12:00:00Z])
+        |> Mail.render()
+        |> Base.url_encode64()
+
+      expect(Api.Users, :gmail_users_messages_get, fn ^connection,
+                                                      "me",
+                                                      ^message_id,
+                                                      [format: "raw"] ->
+        {:ok,
+         %{
+           id: message_id,
+           labelIds: ["INBOX", "UNREAD"],
+           historyId: "98765",
+           raw: raw_email
+         }}
+      end)
+
+      result = Gmail.get_message("test_auth_token", message_id)
+
+      assert {:ok,
+              %{
+                id: ^message_id,
+                label_ids: ["INBOX", "UNREAD"],
+                history_id: 98_765,
+                from: {"John Doe", "john@example.com"},
+                recipients: [
+                  {"Jane Smith", "jane@example.com"},
+                  {"Bob Johnson", "bob@example.com"}
+                ],
+                subject: "Test Email",
+                text: "Hello World!",
+                date: ~U[2024-01-01 12:00:00Z]
+              }} = result
+    end
+
+    test "handles API error" do
+      expect(V1.Connection, :new, fn _auth_token -> %Tesla.Client{} end)
+
+      expect(Api.Users, :gmail_users_messages_get, fn _connection, _user_id, _message_id, _opts ->
+        {:error, %{status: 404, body: "Message not found"}}
+      end)
+
+      result = Gmail.get_message("test_auth_token", "non_existent_message")
+
+      assert {:error, %{status: 404, body: "Message not found"}} = result
+    end
+
+    test "handles message parsing error" do
+      connection = %Tesla.Client{}
+      message_id = "msg123"
+
+      expect(V1.Connection, :new, fn _auth_token -> connection end)
+
+      invalid_raw_email = "invalid_base64_content"
+
+      expect(Api.Users, :gmail_users_messages_get, fn ^connection,
+                                                      "me",
+                                                      ^message_id,
+                                                      [format: "raw"] ->
+        {:ok,
+         %{
+           id: message_id,
+           labelIds: ["INBOX"],
+           historyId: "98765",
+           raw: invalid_raw_email
+         }}
+      end)
+
+      result = Gmail.get_message("test_auth_token", message_id)
+
+      assert {:error, :error_decoding_message} = result
+    end
+  end
 end

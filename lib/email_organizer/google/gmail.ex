@@ -13,6 +13,19 @@ defmodule EmailOrganizer.Google.Gmail do
           expires_at: DateTime.t()
         }
 
+  @type recipient :: {String.t(), String.t()}
+
+  @type message :: %{
+          id: String.t(),
+          label_ids: [String.t()],
+          history_id: integer(),
+          from: recipient(),
+          recipients: [recipient()],
+          subject: String.t(),
+          text: String.t(),
+          date: DateTime.t()
+        }
+
   @type history_response :: %{
           new_history_id: integer(),
           message_ids: [String.t()]
@@ -54,7 +67,46 @@ defmodule EmailOrganizer.Google.Gmail do
     end
   end
 
+  @spec get_message(String.t(), String.t()) :: {:ok, message()} | {:error, any()}
+  def get_message(auth_token, id) do
+    connection = V1.Connection.new(auth_token)
+
+    with {:ok, response} <-
+           Api.Users.gmail_users_messages_get(connection, "me", id, format: "raw"),
+         {:ok, message} <- parse_message(response.raw) do
+      {:ok,
+       %{
+         id: id,
+         label_ids: response.labelIds,
+         history_id: String.to_integer(response.historyId),
+         from: Mail.get_from(message),
+         recipients: Mail.all_recipients(message),
+         subject: Mail.get_subject(message),
+         text: get_message_text(message),
+         date: Mail.Message.get_header(message, "date")
+       }}
+    end
+  end
+
   defp get_topic_name do
     "projects/#{Utils.get_config_value(@project_id)}/topics/#{Utils.get_config_value(@topic)}"
+  end
+
+  defp parse_message(raw) do
+    case Base.url_decode64(raw) do
+      {:ok, message} ->
+        {:ok, Mail.parse(message)}
+
+      :error ->
+        {:error, :error_decoding_message}
+    end
+  rescue
+    exception -> {:error, exception}
+  end
+
+  defp get_message_text(message) do
+    with %Mail.Message{body: body} <- Mail.get_text(message) do
+      body
+    end
   end
 end
