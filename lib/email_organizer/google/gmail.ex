@@ -39,7 +39,12 @@ defmodule EmailOrganizer.Google.Gmail do
   @spec subscribe_user_emails(String.t()) :: {:ok, subscribe_response()} | {:error, any()}
   def subscribe_user_emails(auth_token) do
     connection = V1.Connection.new(auth_token)
-    watch_request = %WatchRequest{topicName: get_topic_name(), labelIds: ["INBOX"]}
+
+    watch_request = %WatchRequest{
+      topicName: get_topic_name(),
+      labelIds: ["INBOX"],
+      labelFilterBehavior: "include"
+    }
 
     with {:ok, response} <- Api.Users.gmail_users_watch(connection, "me", body: watch_request) do
       {:ok,
@@ -60,7 +65,8 @@ defmodule EmailOrganizer.Google.Gmail do
              connection,
              "me",
              startHistoryId: history_id,
-             labelId: "INBOX"
+             labelId: "INBOX",
+             historyType: ["messageAdded"]
            ) do
       message_ids = get_message_ids_from_history(history)
       {:ok, %{new_history_id: history_id, message_ids: message_ids}}
@@ -109,9 +115,11 @@ defmodule EmailOrganizer.Google.Gmail do
   defp get_message_ids_from_history(history) do
     history
     |> Enum.flat_map(fn history ->
-      history.messages
+      history
+      |> Map.get(:messagesAdded)
+      |> List.wrap()
+      |> Enum.map(& &1.message.id)
     end)
-    |> Enum.map(& &1.id)
     |> Enum.uniq()
   end
 

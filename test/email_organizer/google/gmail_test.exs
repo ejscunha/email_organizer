@@ -20,7 +20,8 @@ defmodule EmailOrganizer.Google.GmailTest do
 
       watch_request = %WatchRequest{
         topicName: "projects/project/topics/topic",
-        labelIds: ["INBOX"]
+        labelIds: ["INBOX"],
+        labelFilterBehavior: "include"
       }
 
       expect(V1.Connection, :new, fn auth_token ->
@@ -77,22 +78,23 @@ defmodule EmailOrganizer.Google.GmailTest do
                                                       "me",
                                                       [
                                                         startHistoryId: ^history_id,
-                                                        labelId: "INBOX"
+                                                        labelId: "INBOX",
+                                                        historyType: ["messageAdded"]
                                                       ] ->
         {:ok,
          %{
            historyId: 67_890,
            history: [
              %{
-               messages: [
-                 %{id: "msg1"},
-                 %{id: "msg2"}
+               messagesAdded: [
+                 %{message: %{id: "msg1"}},
+                 %{message: %{id: "msg2"}}
                ]
              },
              %{
-               messages: [
-                 %{id: "msg2"},
-                 %{id: "msg3"}
+               messagesAdded: [
+                 %{message: %{id: "msg2"}},
+                 %{message: %{id: "msg3"}}
                ]
              }
            ]
@@ -118,7 +120,8 @@ defmodule EmailOrganizer.Google.GmailTest do
                                                       "me",
                                                       [
                                                         startHistoryId: ^history_id,
-                                                        labelId: "INBOX"
+                                                        labelId: "INBOX",
+                                                        historyType: ["messageAdded"]
                                                       ] ->
         {:ok,
          %{
