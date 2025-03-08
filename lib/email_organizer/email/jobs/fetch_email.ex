@@ -10,6 +10,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmail do
   alias EmailOrganizer.Account
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email
+  alias EmailOrganizer.Email.Jobs.ClassifyEmail
   alias EmailOrganizer.Google.Gmail
 
   @spec enqueue!(User.t(), String.t()) :: Oban.Job.t()
@@ -28,6 +29,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmail do
          Logger.info("Fetched email message", user_id: user_id, email_id: email_id),
          email_attrs = Map.merge(message, %{user_id: user_id, external_id: email_id}),
          {:ok, _email} <- Email.upsert_email(email_attrs) do
+      ClassifyEmail.enqueue!(email_id)
       :ok
     else
       nil ->

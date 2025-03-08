@@ -76,7 +76,8 @@ config :email_organizer, Oban,
   repo: EmailOrganizer.Repo,
   queues: [
     email_history: 10,
-    email_fetch: 10
+    email_fetch: 10,
+    email_classify: 10
   ]
 
 # Import environment specific config. This must remain at the bottom

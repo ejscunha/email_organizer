@@ -9,6 +9,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
 
   alias EmailOrganizer.Email
   alias EmailOrganizer.Email.Email, as: EmailRecord
+  alias EmailOrganizer.Email.Jobs.ClassifyEmail
   alias EmailOrganizer.Email.Jobs.FetchEmail
   alias EmailOrganizer.Google.Gmail
 
@@ -40,6 +41,8 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
                  "user_id" => user.id,
                  "email_id" => email_id
                })
+
+      assert_enqueued(worker: ClassifyEmail, args: %{email_id: email_id})
 
       assert %EmailRecord{} = Email.get_email_by_external_id(email_id)
     end
