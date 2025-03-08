@@ -22,7 +22,7 @@ defmodule EmailOrganizerWeb.AuthController do
       |> extract_user_info()
       |> Account.upsert_user()
 
-    SubscriptionManager.subscribe_user_emails(user, auth.credentials.token)
+    SubscriptionManager.subscribe_user_emails(user)
 
     conn
     |> put_session(:user_id, user.id)
@@ -46,10 +46,13 @@ defmodule EmailOrganizerWeb.AuthController do
     render(conn, :failed)
   end
 
-  defp extract_user_info(%Auth{info: info}) do
+  defp extract_user_info(%Auth{credentials: credentials, info: info}) do
     %{
       name: info.name,
-      email: info.email
+      email: info.email,
+      auth_token: credentials.token,
+      auth_token_expires_at: DateTime.from_unix!(credentials.expires_at),
+      refresh_token: credentials.refresh_token
     }
   end
 end

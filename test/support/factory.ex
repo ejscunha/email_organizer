@@ -12,7 +12,10 @@ defmodule EmailOrganizer.Support.Factory do
   def user_factory do
     %User{
       email: sequence(:email, &"user-#{&1}@example.com"),
-      name: sequence(:name, &"User #{&1}")
+      name: sequence(:name, &"User #{&1}"),
+      auth_token: sequence(:auth_token, &"auth_token_#{&1}"),
+      auth_token_expires_at: DateTime.add(DateTime.utc_now(), 7, :day),
+      refresh_token: sequence(:refresh_token, &"refresh_token_#{&1}")
     }
   end
 

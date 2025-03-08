@@ -7,6 +7,7 @@ defmodule EmailOrganizerWeb.Plug.Auth do
   import Plug.Conn
 
   alias EmailOrganizer.Account
+  alias EmailOrganizer.Account.User
 
   @behaviour Plug
 
@@ -15,19 +16,14 @@ defmodule EmailOrganizerWeb.Plug.Auth do
   end
 
   def call(conn, _opts) do
-    case get_session(conn, :user_id, :not_found) do
-      :not_found ->
-        query_string = if conn.query_string != "", do: "?#{conn.query_string}", else: ""
-        current_path = "#{conn.request_path}#{query_string}"
-
+    with user_id when is_integer(user_id) <- get_session(conn, :user_id, :not_found),
+         %User{} = user <- Account.get_user(user_id) do
+      assign(conn, :current_user, user)
+    else
+      _other ->
         conn
-        |> put_session(:callback_url, current_path)
         |> redirect(to: "/auth/google")
         |> halt()
-
-      user_id ->
-        user = Account.get_user!(user_id)
-        assign(conn, :current_user, user)
     end
   end
 end

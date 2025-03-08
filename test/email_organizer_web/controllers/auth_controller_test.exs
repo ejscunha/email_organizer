@@ -26,7 +26,8 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
     test "stores user in session and redirects to root path", %{conn: conn} do
       user = insert(:user)
 
-      expect(SubscriptionManager, :subscribe_user_emails, fn ^user, "test_auth_token" ->
+      expect(SubscriptionManager, :subscribe_user_emails, fn subscribe_user ->
+        assert subscribe_user == EmailOrganizer.Repo.reload(user)
         :ok
       end)
 
@@ -34,7 +35,9 @@ defmodule EmailOrganizerWeb.AuthControllerTest do
         conn
         |> assign(:ueberauth_auth, %Ueberauth.Auth{
           credentials: %{
-            token: "test_auth_token"
+            token: "test_auth_token",
+            expires_at: DateTime.add(DateTime.utc_now(), 7, :day) |> DateTime.to_unix(),
+            refresh_token: "test_refresh_token"
           },
           info: %{
             name: user.name,

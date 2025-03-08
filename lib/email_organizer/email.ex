@@ -138,19 +138,19 @@ defmodule EmailOrganizer.Email do
     Repo.get_by(Subscription, user_id: user_id)
   end
 
-  @spec subscribe_user_emails(User.t(), String.t()) :: :ok | :error
-  def subscribe_user_emails(user, auth_token) do
+  @spec subscribe_user_emails(User.t()) :: :ok | :error
+  def subscribe_user_emails(user) do
     with %Subscription{} = subscription <- get_subscription_by_user_id(user.id),
          true <- DateTime.after?(subscription.expires_at, DateTime.utc_now()) do
       Logger.debug("User subscription is still active", user_id: user.id)
       :ok
     else
-      _other -> do_subscribe_user_emails(user, auth_token)
+      _other -> do_subscribe_user_emails(user)
     end
   end
 
-  defp do_subscribe_user_emails(user, auth_token) do
-    with {:ok, susbscribe_response} <- Gmail.subscribe_user_emails(auth_token),
+  defp do_subscribe_user_emails(user) do
+    with {:ok, susbscribe_response} <- Gmail.subscribe_user_emails(user.auth_token),
          {:ok, _subscription} <-
            upsert_subscription(%{
              last_id: susbscribe_response.history_id,

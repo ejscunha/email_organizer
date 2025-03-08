@@ -24,18 +24,16 @@ defmodule EmailOrganizer.Account do
   @doc """
   Gets a single user.
 
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
   ## Examples
 
-      iex> get_user!(123)
+      iex> get_user(123)
       %User{}
 
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
+      iex> get_user(456)
+      nil
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user(id), do: Repo.get(User, id)
 
   @doc """
   Creates a user.
@@ -117,6 +115,9 @@ defmodule EmailOrganizer.Account do
   def upsert_user(params) do
     params
     |> User.changeset()
-    |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:name]})
+    |> Repo.insert(
+      conflict_target: :email,
+      on_conflict: {:replace, [:name, :auth_token, :auth_token_expires_at, :refresh_token]}
+    )
   end
 end

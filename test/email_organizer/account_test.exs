@@ -16,9 +16,9 @@ defmodule EmailOrganizer.AccountTest do
       assert Account.list_users() == users
     end
 
-    test "get_user!/1 returns the user with given id" do
+    test "get_user/1 returns the user with given id" do
       user = insert(:user)
-      assert Account.get_user!(user.id) == user
+      assert Account.get_user(user.id) == user
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -43,13 +43,13 @@ defmodule EmailOrganizer.AccountTest do
     test "update_user/2 with invalid data returns error changeset" do
       user = insert(:user)
       assert {:error, %Ecto.Changeset{}} = Account.update_user(user, @invalid_attrs)
-      assert user == Account.get_user!(user.id)
+      assert user == Account.get_user(user.id)
     end
 
     test "delete_user/1 deletes the user" do
       user = insert(:user)
       assert {:ok, %User{}} = Account.delete_user(user)
-      assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
+      assert is_nil(Account.get_user(user.id))
     end
 
     test "change_user/1 returns a user changeset" do
@@ -65,7 +65,7 @@ defmodule EmailOrganizer.AccountTest do
                Account.upsert_user(%{email: "test@example.com", name: "Test User 2"})
 
       assert %User{email: "test@example.com", name: "Test User 2"} =
-               Account.get_user!(user.id)
+               Account.get_user(user.id)
     end
   end
 end

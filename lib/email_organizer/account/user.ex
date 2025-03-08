@@ -10,11 +10,15 @@ defmodule EmailOrganizer.Account.User do
   alias Ecto.Changeset
   alias EmailOrganizer.Email.Category
   alias EmailOrganizer.Email.Subscription
+
   @type t :: %__MODULE__{}
 
   schema "users" do
     field :email, :string
     field :name, :string
+    field :auth_token, :string
+    field :auth_token_expires_at, :utc_datetime
+    field :refresh_token, :string
 
     has_many :categories, Category
     has_one :subscription, Subscription
@@ -25,7 +29,7 @@ defmodule EmailOrganizer.Account.User do
   @spec changeset(t() | Changeset.t(), map()) :: Changeset.t()
   def changeset(user \\ %__MODULE__{}, attrs) do
     user
-    |> cast(attrs, [:email, :name])
+    |> cast(attrs, [:email, :name, :auth_token, :auth_token_expires_at, :refresh_token])
     |> validate_required([:email, :name])
     |> unique_constraint(:email)
   end

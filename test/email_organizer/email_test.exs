@@ -125,14 +125,15 @@ defmodule EmailOrganizer.EmailTest do
       assert Email.get_subscription_by_user_id(0) == nil
     end
 
-    test "subscribe_user_emails/2 creates new subscription when none exists", %{user: user} do
+    test "subscribe_user_emails/1 creates new subscription when none exists", %{user: user} do
+      auth_token = user.auth_token
       expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
 
-      expect(Gmail, :subscribe_user_emails, fn "test_token" ->
+      expect(Gmail, :subscribe_user_emails, fn ^auth_token ->
         {:ok, %{history_id: 123, expires_at: expires_at}}
       end)
 
-      assert :ok = Email.subscribe_user_emails(user, "test_token")
+      assert :ok = Email.subscribe_user_emails(user)
 
       subscription = Email.get_subscription_by_user_id(user.id)
       assert subscription.last_id == 123
@@ -144,7 +145,7 @@ defmodule EmailOrganizer.EmailTest do
 
       reject(Gmail, :subscribe_user_emails, 1)
 
-      assert :ok = Email.subscribe_user_emails(user, "test_token")
+      assert :ok = Email.subscribe_user_emails(user)
     end
 
     test "subscribe_user_emails/2 returns error when Gmail API fails", %{user: user} do
@@ -152,7 +153,7 @@ defmodule EmailOrganizer.EmailTest do
         {:error, "API Error"}
       end)
 
-      assert :error = Email.subscribe_user_emails(user, "test_token")
+      assert :error = Email.subscribe_user_emails(user)
     end
   end
 end
