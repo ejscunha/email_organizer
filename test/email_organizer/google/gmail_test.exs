@@ -243,12 +243,11 @@ defmodule EmailOrganizer.Google.GmailTest do
     end
   end
 
-  describe "archive_email/3" do
+  describe "archive_email/2" do
     test "successfully archives an email" do
       connection = %Tesla.Client{}
       message_id = "msg123"
-      label_ids = ["INBOX"]
-      body = %ModifyMessageRequest{removeLabelIds: label_ids}
+      body = %ModifyMessageRequest{removeLabelIds: ["INBOX"]}
 
       expect(V1.Connection, :new, fn auth_token ->
         assert auth_token == "test_auth_token"
@@ -262,7 +261,7 @@ defmodule EmailOrganizer.Google.GmailTest do
         {:ok, build(:message, id: message_id)}
       end)
 
-      assert :ok = Gmail.archive_email("test_auth_token", message_id, label_ids)
+      assert :ok = Gmail.archive_email("test_auth_token", message_id)
     end
 
     test "handles API error" do
@@ -276,7 +275,7 @@ defmodule EmailOrganizer.Google.GmailTest do
       end)
 
       assert {:error, %{status: 400, body: "Bad Request"}} =
-               Gmail.archive_email("test_auth_token", "msg123", ["INBOX"])
+               Gmail.archive_email("test_auth_token", "msg123")
     end
   end
 end

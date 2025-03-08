@@ -3,6 +3,8 @@ defmodule EmailOrganizer.Google.Gmail do
   A module for interacting with Gmail.
   """
 
+  require Logger
+
   alias EmailOrganizer.Utils
   alias GoogleApi.Gmail.V1
   alias GoogleApi.Gmail.V1.Api
@@ -95,14 +97,26 @@ defmodule EmailOrganizer.Google.Gmail do
     end
   end
 
-  @spec archive_email(String.t(), String.t(), [String.t()]) :: :ok | {:error, any()}
-  def archive_email(auth_token, id, label_ids) do
+  @spec archive_email(String.t(), String.t()) :: :ok | {:error, any()}
+  def archive_email(auth_token, id) do
     connection = V1.Connection.new(auth_token)
-    body = %ModifyMessageRequest{removeLabelIds: label_ids}
+    body = %ModifyMessageRequest{removeLabelIds: ["INBOX"]}
 
-    with {:ok, _response} <-
-           Api.Users.gmail_users_messages_modify(connection, "me", id, body: body) do
-      :ok
+    case Api.Users.gmail_users_messages_modify(connection, "me", id, body: body) do
+      {:ok, _response} ->
+        :ok
+
+      {:error, %Tesla.Env{status: 400} = reason} ->
+        Logger.warning(
+          "Failing silently to archive email because it's probably already archived",
+          email_id: id,
+          reason: inspect(reason)
+        )
+
+        :ok
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 

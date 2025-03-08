@@ -29,7 +29,6 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
       email =
         insert(:email,
           external_id: email_id,
-          label_ids: ["INBOX"],
           summary: nil,
           user_id: user.id
         )
@@ -43,9 +42,8 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
 
       email = EmailOrganizer.Repo.reload(email)
 
-      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id, label_ids: ["INBOX"]})
+      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id})
 
-      assert email.label_ids == []
       assert email.summary == "Test Summary"
       assert email.category_id == category.id
     end

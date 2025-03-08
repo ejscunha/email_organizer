@@ -13,44 +13,40 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmailTest do
   describe "enqueue!/2" do
     test "enqueues the job" do
       email_id = "123"
-      label_ids = ["INBOX"]
 
-      assert %Oban.Job{} = ArchiveEmail.enqueue!(email_id, label_ids)
+      assert %Oban.Job{} = ArchiveEmail.enqueue!(email_id)
 
-      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id, label_ids: label_ids})
+      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id})
     end
   end
 
   describe "perform!/1" do
     test "archives the email" do
       email_id = "123"
-      label_ids = ["INBOX"]
       user = insert(:user)
       insert(:email, external_id: email_id, user_id: user.id)
       auth_token = user.auth_token
 
-      expect(Gmail, :archive_email, fn ^auth_token, ^email_id, ^label_ids ->
+      expect(Gmail, :archive_email, fn ^auth_token, ^email_id ->
         :ok
       end)
 
-      assert :ok = perform_job(ArchiveEmail, %{email_id: email_id, label_ids: label_ids})
+      assert :ok = perform_job(ArchiveEmail, %{email_id: email_id})
     end
 
     test "returns an error if the email is not found" do
-      assert {:cancel, :email_not_found} =
-               perform_job(ArchiveEmail, %{email_id: "123", label_ids: ["INBOX"]})
+      assert {:cancel, :email_not_found} = perform_job(ArchiveEmail, %{email_id: "123"})
     end
 
     test "returns an error if the email is not archived" do
       user = insert(:user)
-      email = insert(:email, external_id: "123", label_ids: ["INBOX"], user_id: user.id)
+      email = insert(:email, external_id: "123", user_id: user.id)
 
-      expect(Gmail, :archive_email, fn _auth_token, _email_id, _label_ids ->
+      expect(Gmail, :archive_email, fn _auth_token, _email_id ->
         {:error, "API Error"}
       end)
 
-      assert {:error, "API Error"} =
-               perform_job(ArchiveEmail, %{email_id: email.external_id, label_ids: ["INBOX"]})
+      assert {:error, "API Error"} = perform_job(ArchiveEmail, %{email_id: email.external_id})
     end
   end
 end

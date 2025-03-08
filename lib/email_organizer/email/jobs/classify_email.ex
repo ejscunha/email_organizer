@@ -25,12 +25,11 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmail do
 
     with %EmailRecord{} = email <- Email.get_email_by_external_id(email_id),
          {:ok, result} <- LLM.categorize_email(email),
-         %Oban.Job{} <- ArchiveEmail.enqueue!(email_id, email.label_ids),
+         %Oban.Job{} <- ArchiveEmail.enqueue!(email_id),
          {:ok, _email} <-
            email
            |> Map.from_struct()
            |> Map.merge(%{
-             label_ids: [],
              summary: result["summary"],
              category_id: result["category_id"]
            })
