@@ -62,6 +62,7 @@ defmodule EmailOrganizer.Support.Factory do
       recipients: ["test@example.com"],
       subject: "Test Email",
       text: "This is a test email.",
+      html: "This is a test email.",
       date: ~U[2021-01-01 00:00:00Z]
     }
   end

@@ -23,6 +23,7 @@ defmodule EmailOrganizer.Google.Gmail do
           recipients: [recipient()],
           subject: String.t(),
           text: String.t(),
+          html: String.t(),
           date: DateTime.t()
         }
 
@@ -88,6 +89,7 @@ defmodule EmailOrganizer.Google.Gmail do
          recipients: Mail.all_recipients(message),
          subject: Mail.get_subject(message),
          text: get_message_text(message),
+         html: get_message_html(message),
          date: Mail.Message.get_header(message, "date")
        }}
     end
@@ -111,6 +113,12 @@ defmodule EmailOrganizer.Google.Gmail do
 
   defp get_message_text(message) do
     with %Mail.Message{body: body} <- Mail.get_text(message) do
+      body
+    end
+  end
+
+  defp get_message_html(message) do
+    with %Mail.Message{body: body} <- Mail.get_html(message) do
       body
     end
   end

@@ -46,7 +46,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmail do
         {:cancel, :parsing_error}
 
       {:error, reason} ->
-        Logger.error("Error getting email",
+        Logger.error("Error fetching email",
           user_id: user_id,
           email_id: email_id,
           reason: inspect(reason)

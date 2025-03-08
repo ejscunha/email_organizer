@@ -186,6 +186,7 @@ defmodule EmailOrganizer.EmailTest do
         recipients: ["test@example.com"],
         subject: "Test Subject",
         text: "Test Text",
+        html: "Test HTML",
         date: datetime,
         summary: "Test Summary",
         user_id: user.id,
@@ -198,6 +199,7 @@ defmodule EmailOrganizer.EmailTest do
       assert email.recipients == ["test@example.com"]
       assert email.subject == "Test Subject"
       assert email.text == "Test Text"
+      assert email.html == "Test HTML"
       assert email.date == datetime
       assert email.summary == "Test Summary"
       assert email.user_id == user.id
@@ -211,6 +213,7 @@ defmodule EmailOrganizer.EmailTest do
         recipients: nil,
         subject: nil,
         text: nil,
+        html: nil,
         date: nil,
         summary: nil,
         user_id: nil,
