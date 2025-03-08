@@ -63,7 +63,7 @@ config :ueberauth, Ueberauth,
     google:
       {Ueberauth.Strategy.Google,
        [
-         default_scope: "email profile",
+         default_scope: "email profile https://www.googleapis.com/auth/gmail.modify",
          prompt: "select_account"
        ]}
   ]
