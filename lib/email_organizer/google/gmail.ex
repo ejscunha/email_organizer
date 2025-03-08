@@ -13,7 +13,7 @@ defmodule EmailOrganizer.Google.Gmail do
           expires_at: DateTime.t()
         }
 
-  @type recipient :: {String.t(), String.t()}
+  @type recipient :: String.t() | {String.t(), String.t()}
 
   @type message :: %{
           id: String.t(),

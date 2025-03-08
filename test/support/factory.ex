@@ -32,4 +32,17 @@ defmodule EmailOrganizer.Support.Factory do
       expires_at: DateTime.add(DateTime.utc_now(), 7, :day)
     }
   end
+
+  def message_factory do
+    %{
+      id: sequence(:id, &"message-#{&1}"),
+      label_ids: ["INBOX"],
+      history_id: sequence(:history_id, & &1),
+      from: "test@example.com",
+      recipients: ["test@example.com"],
+      subject: "Test Email",
+      text: "This is a test email.",
+      date: ~U[2021-01-01 00:00:00Z]
+    }
+  end
 end
