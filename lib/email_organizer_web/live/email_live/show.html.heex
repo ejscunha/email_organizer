@@ -1,0 +1,55 @@
+<div class="flex items-center mb-8">
+  <.link
+    navigate={~p"/categories/#{@category.id}"}
+    class="text-blue-600 hover:text-blue-800 flex items-center"
+  >
+    <.icon name="hero-arrow-left" class="h-5 w-5 mr-1" /> Back to category
+  </.link>
+</div>
+<div class="bg-white shadow-md rounded-lg p-6 mb-8">
+  <div class="mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">{@email.subject}</h1>
+        <div class="flex space-x-2">
+          <button
+            phx-click="delete_email"
+            class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center"
+          >
+            <.icon name="hero-trash" class="h-4 w-4 mr-1" /> Delete
+          </button>
+          <button
+            phx-click="unsubscribe_email"
+            class="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center"
+          >
+            <.icon name="hero-no-symbol" class="h-4 w-4 mr-1" /> Unsubscribe
+          </button>
+        </div>
+      </div>
+      <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-gray-500">From</p>
+            <p class="text-gray-800">{@email.from}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Date</p>
+            <p class="text-gray-800">
+              {Calendar.strftime(@email.date, "%a, %b %d %Y, %I:%M %p")}
+            </p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-sm text-gray-500">To</p>
+          <p class="text-gray-800">{Enum.join(@email.recipients, ", ")}</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-200 pt-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Email Content</h2>
+        <div class="bg-gray-50 rounded-lg p-4 overflow-auto">
+          <pre class="whitespace-pre-wrap text-gray-800 font-mono text-sm">{@email.text}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

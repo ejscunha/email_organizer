@@ -179,8 +179,10 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
 
       assert has_element?(view, "button[phx-click='delete_selected'][disabled]")
 
+      email_id = List.last(emails).id
+
       view
-      |> element("input#email-#{List.last(emails).id}")
+      |> element("td[phx-click='select_email'][phx-value-id='#{email_id}']")
       |> render_click()
 
       assert has_element?(view, "button", "Delete")
@@ -204,8 +206,10 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
     test "can delete selected emails", %{conn: conn, category: category, emails: emails} do
       {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
 
+      email_id = List.last(emails).id
+
       view
-      |> element("input#email-#{List.last(emails).id}")
+      |> element("td[phx-click='select_email'][phx-value-id='#{email_id}']")
       |> render_click()
 
       view
@@ -218,6 +222,25 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
       )
 
       assert has_element?(view, "div", "Emails deleted successfully")
+    end
+
+    test "can navigate to email details by clicking on a row", %{
+      conn: conn,
+      category: category,
+      emails: emails
+    } do
+      email = List.last(emails)
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      {:ok, _view, html} =
+        view
+        |> element("tr[phx-click]", email.summary)
+        |> render_click()
+        |> follow_redirect(conn)
+
+      assert html =~ email.subject
+      assert html =~ email.from
+      assert html =~ "Email Content"
     end
   end
 end

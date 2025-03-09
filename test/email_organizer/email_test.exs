@@ -238,6 +238,17 @@ defmodule EmailOrganizer.EmailTest do
       assert Email.get_email_by_external_id("nonexistent") == nil
     end
 
+    test "get_email!/1 returns the email with the given id" do
+      email = insert(:email)
+      assert Email.get_email!(email.id) == email
+    end
+
+    test "get_email!/1 raises Ecto.NoResultsError when the email does not exist" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Email.get_email!(999_999)
+      end
+    end
+
     test "list_emails_by_category/2 returns the emails for the given category with pagination" do
       category = insert(:category)
       emails = insert_list(3, :email, category_id: category.id)

@@ -251,6 +251,23 @@ defmodule EmailOrganizer.Email do
   def get_email_by_external_id(external_id), do: Repo.get_by(Email, external_id: external_id)
 
   @doc """
+  Gets a single email.
+
+  Raises `Ecto.NoResultsError` if the Email does not exist.
+
+  ## Examples
+
+      iex> get_email!(123)
+      %Email{}
+
+      iex> get_email!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_email!(integer()) :: Email.t()
+  def get_email!(id), do: Repo.get!(Email, id)
+
+  @doc """
   Lists emails for a specific category with pagination and sorting.
 
   ## Examples

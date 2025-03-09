@@ -126,13 +126,15 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr :for={email <- @emails.entries} class="hover:bg-gray-50">
-                  <td class="px-6 py-4">
+                <tr
+                  :for={email <- @emails.entries}
+                  class="hover:bg-gray-50 cursor-pointer"
+                  phx-click={JS.navigate(~p"/emails/#{email.id}")}
+                >
+                  <td class="px-6 py-4" phx-click="select_email" phx-value-id={email.id}>
                     <input
                       type="checkbox"
                       id={"email-#{email.id}"}
-                      phx-click="select_email"
-                      phx-value-id={email.id}
                       class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                       checked={email.id in @selected_emails}
                     />

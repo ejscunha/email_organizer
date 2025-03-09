@@ -30,6 +30,7 @@ defmodule EmailOrganizerWeb.Router do
       live "/categories/new", CategoryLive.New
       live "/categories/:id/edit", CategoryLive.Edit
       live "/categories/:id", CategoryLive.Show
+      live "/emails/:id", EmailLive.Show
     end
   end
 
