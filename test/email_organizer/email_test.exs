@@ -147,7 +147,7 @@ defmodule EmailOrganizer.EmailTest do
       assert Repo.reload(subscription).last_id == 123
     end
 
-    test "subscribe_user_emails/1 creates new subscription when none exists", %{user: user} do
+    test "subscribe_user_emails/1 subscribes to Gmail user emails", %{user: user} do
       auth_token = user.auth_token
       expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
 
@@ -160,14 +160,6 @@ defmodule EmailOrganizer.EmailTest do
       subscription = Email.get_subscription_by_user_id(user.id)
       assert subscription.last_id == 123
       assert DateTime.compare(subscription.expires_at, expires_at) == :eq
-    end
-
-    test "subscribe_user_emails/2 returns :ok when subscription is still active", %{user: user} do
-      insert(:subscription, user: user, expires_at: DateTime.add(DateTime.utc_now(), 7, :day))
-
-      reject(Gmail, :subscribe_user_emails, 1)
-
-      assert :ok = Email.subscribe_user_emails(user)
     end
 
     test "subscribe_user_emails/2 returns error when Gmail API fails", %{user: user} do
