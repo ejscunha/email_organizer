@@ -7,6 +7,7 @@ defmodule EmailOrganizer.Email do
 
   require Logger
 
+  alias EmailOrganizer.LLM
   alias Ecto.Changeset
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
@@ -293,5 +294,49 @@ defmodule EmailOrganizer.Email do
     |> Repo.delete_all()
 
     :ok
+  end
+
+  @spec unsubscribe_from_emails([integer()], pid() | nil) :: :ok
+  def unsubscribe_from_emails(email_ids, notify_pid \\ nil) when is_list(email_ids) do
+    Email
+    |> where([e], e.id in ^email_ids)
+    |> Repo.all()
+    |> Enum.each(fn email ->
+      Task.Supervisor.start_child(EmailOrganizer.UnsubscribeEmailTaskSupervisor, fn ->
+        do_unsubscribe_email(email, notify_pid)
+      end)
+    end)
+  end
+
+  defp do_unsubscribe_email(email, notify_pid) do
+    case LLM.unsubscribe_from_email(email) do
+      {:ok, %{"success" => true}} ->
+        Logger.info("Unsubscribed from email", email_id: email.id)
+
+        if is_pid(notify_pid) do
+          send(notify_pid, {:unsubscribed, email})
+        end
+
+      {:ok, %{"success" => false, "link_found" => false}} ->
+        Logger.info("No unsubscribe link found for email", email_id: email.id)
+
+        if is_pid(notify_pid) do
+          send(notify_pid, {:no_unsubscribe_link_found, email})
+        end
+
+      {:ok, %{"success" => false, "message" => message}} ->
+        Logger.error("Failed to unsubscribe from email", email_id: email.id, reason: message)
+
+        if is_pid(notify_pid) do
+          send(notify_pid, {:failed_to_unsubscribe, email})
+        end
+
+      {:error, :decoding_error} ->
+        Logger.error("Error while decoding the response from LLM", email_id: email.id)
+
+        if is_pid(notify_pid) do
+          send(notify_pid, {:failed_to_unsubscribe, email})
+        end
+    end
   end
 end

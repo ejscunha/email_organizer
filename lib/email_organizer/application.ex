@@ -13,6 +13,7 @@ defmodule EmailOrganizer.Application do
       {Goth, name: EmailOrganizer.Goth},
       EmailOrganizer.Broadway,
       EmailOrganizer.SubscriptionManager,
+      {Task.Supervisor, name: EmailOrganizer.UnsubscribeEmailTaskSupervisor},
       EmailOrganizerWeb.Endpoint
     ]
 
