@@ -10,5 +10,9 @@ defmodule EmailOrganizer.Support.Mocks do
     Mimic.copy(EmailOrganizer.LLM, type_check: true)
     Mimic.copy(GoogleApi.Gmail.V1.Connection, type_check: true)
     Mimic.copy(GoogleApi.Gmail.V1.Api.Users, type_check: true)
+    Mimic.copy(Wallaby, type_check: true)
+    Mimic.copy(Wallaby.Browser, type_check: true)
+    Mimic.copy(Wallaby.Element, type_check: true)
+    Mimic.copy(Wallaby.Query, type_check: true)
   end
 end

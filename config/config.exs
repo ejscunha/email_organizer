@@ -52,7 +52,7 @@ config :tailwind,
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id, :user_id, :reason, :email, :email_id, :message, :data, :result]
+  metadata: [:request_id, :user_id, :reason, :email, :email_id, :message, :data, :result, :link]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -82,6 +82,11 @@ config :email_organizer, Oban,
   ]
 
 config :langchain, :openai_key, fn -> System.fetch_env!("OPENAI_API_KEY") end
+
+# Add this section for Wallaby configuration
+config :wallaby,
+  driver: Wallaby.Chrome,
+  chrome: [headless: true]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

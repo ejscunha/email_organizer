@@ -31,7 +31,7 @@ defmodule EmailOrganizer.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:ex_machina, "~> 2.8", only: :test},
-      {:floki, ">= 0.30.0", only: :test},
+      {:floki, "~> 0.37"},
       {:google_api_gmail, "~> 0.16"},
       {:goth, "~> 1.4"},
       {:heroicons,
@@ -41,6 +41,7 @@ defmodule EmailOrganizer.MixProject do
        app: false,
        compile: false,
        depth: 1},
+      {:httpoison, "~> 2.2"},
       {:jason, "~> 1.2"},
       {:langchain, "~> 0.3"},
       {:mail, github: "DockYard/elixir-mail", ref: "889b7b2"},
@@ -57,7 +58,8 @@ defmodule EmailOrganizer.MixProject do
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:ueberauth_google, "~> 0.10"}
+      {:ueberauth_google, "~> 0.10"},
+      {:wallaby, "~> 0.30"}
     ]
   end
 
