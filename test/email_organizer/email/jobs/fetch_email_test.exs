@@ -25,6 +25,19 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
 
       assert_enqueued(worker: FetchEmail, args: %{user_id: user.id, email_id: email_id})
     end
+
+    test "does not enqueue duplicate jobs", %{user: user, email_id: email_id} do
+      user_id = user.id
+
+      FetchEmail.enqueue!(user, email_id)
+
+      assert_enqueued(worker: FetchEmail, args: %{user_id: user_id, email_id: email_id})
+
+      FetchEmail.enqueue!(user, email_id)
+
+      assert_enqueued(worker: FetchEmail, args: %{user_id: user_id, email_id: email_id})
+      assert [%Oban.Job{}] = all_enqueued()
+    end
   end
 
   describe "perform/1" do

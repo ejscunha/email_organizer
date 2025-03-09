@@ -3,7 +3,7 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmail do
   Job for archiving emails.
   """
 
-  use Oban.Worker, queue: :email_archive
+  use Oban.Worker, queue: :email_archive, unique: [period: :infinity, keys: [:email_id]]
 
   require Logger
 

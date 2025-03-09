@@ -18,6 +18,19 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmailTest do
 
       assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id})
     end
+
+    test "does not enqueue duplicate jobs" do
+      email_id = "123"
+
+      ArchiveEmail.enqueue!(email_id)
+
+      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id})
+
+      ArchiveEmail.enqueue!(email_id)
+
+      assert_enqueued(worker: ArchiveEmail, args: %{email_id: email_id})
+      assert [%Oban.Job{}] = all_enqueued()
+    end
   end
 
   describe "perform!/1" do

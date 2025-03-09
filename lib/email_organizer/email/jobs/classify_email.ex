@@ -3,7 +3,7 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmail do
   Job for classifying emails.
   """
 
-  use Oban.Worker, queue: :email_classify
+  use Oban.Worker, queue: :email_classify, unique: [period: :infinity, keys: [:email_id]]
 
   require Logger
 

@@ -3,7 +3,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmail do
   A worker that fetches an email.
   """
 
-  use Oban.Worker, queue: :email_fetch
+  use Oban.Worker, queue: :email_fetch, unique: [period: :infinity, keys: [:user_id, :email_id]]
 
   require Logger
 

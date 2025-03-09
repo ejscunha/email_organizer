@@ -18,6 +18,19 @@ defmodule EmailOrganizer.Email.Jobs.ClassifyEmailTest do
 
       assert_enqueued(worker: ClassifyEmail, args: %{email_id: email_id})
     end
+
+    test "does not enqueue duplicate jobs" do
+      email_id = "123"
+
+      ClassifyEmail.enqueue!(email_id)
+
+      assert_enqueued(worker: ClassifyEmail, args: %{email_id: email_id})
+
+      ClassifyEmail.enqueue!(email_id)
+
+      assert_enqueued(worker: ClassifyEmail, args: %{email_id: email_id})
+      assert [%Oban.Job{}] = all_enqueued()
+    end
   end
 
   describe "perform/1" do
