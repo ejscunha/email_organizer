@@ -237,5 +237,58 @@ defmodule EmailOrganizer.EmailTest do
     test "get_email_by_external_id/1 returns nil when the email does not exist" do
       assert Email.get_email_by_external_id("nonexistent") == nil
     end
+
+    test "list_emails_by_category/2 returns the emails for the given category with pagination" do
+      category = insert(:category)
+      emails = insert_list(3, :email, category_id: category.id)
+
+      assert Email.list_emails_by_category(category.id, %{page: 1, per_page: 1}) ==
+               %Scrivener.Page{
+                 entries: [hd(emails)],
+                 page_number: 1,
+                 page_size: 1,
+                 total_entries: 3,
+                 total_pages: 3
+               }
+    end
+
+    test "list_emails_by_category/2 returns the emails for the given category sorted by date" do
+      category = insert(:category)
+      emails = insert_list(3, :email, category_id: category.id)
+
+      assert Email.list_emails_by_category(category.id, %{
+               page: 1,
+               per_page: 1,
+               sort_by: :subject,
+               sort_order: :desc
+             }) == %Scrivener.Page{
+               entries: [List.last(emails)],
+               page_number: 1,
+               page_size: 1,
+               total_entries: 3,
+               total_pages: 3
+             }
+    end
+
+    test "list_emails_by_category/2 returns an empty list when the category does not exist" do
+      assert Email.list_emails_by_category(0) == %Scrivener.Page{
+               entries: [],
+               page_number: 1,
+               page_size: 10,
+               total_entries: 0,
+               total_pages: 1
+             }
+    end
+
+    test "delete_emails/1 deletes the emails with the given ids" do
+      emails = insert_list(3, :email)
+      [id1, id2, id3] = ids = Enum.map(emails, & &1.id)
+
+      assert :ok = Email.delete_emails(ids)
+
+      refute Repo.exists?(EmailRecord, id: id1)
+      refute Repo.exists?(EmailRecord, id: id2)
+      refute Repo.exists?(EmailRecord, id: id3)
+    end
   end
 end

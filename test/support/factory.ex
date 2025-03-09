@@ -37,12 +37,13 @@ defmodule EmailOrganizer.Support.Factory do
   def email_factory do
     %Email{
       external_id: sequence(:external_id, &"email-#{&1}"),
-      from: "test@example.com",
+      from: sequence(:from, &"test-#{&1}@example.com"),
       recipients: ["test@example.com"],
-      subject: "Test Email",
+      subject: sequence(:subject, &"Test Email #{&1}"),
       text: "This is a test email.",
+      html: "This is a test email.",
       date: ~U[2021-01-01 00:00:00Z],
-      summary: "Test Summary"
+      summary: sequence(:summary, &"Test Summary #{&1}")
     }
   end
 

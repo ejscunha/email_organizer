@@ -249,4 +249,42 @@ defmodule EmailOrganizer.Email do
   """
   @spec get_email_by_external_id(String.t()) :: Email.t() | nil
   def get_email_by_external_id(external_id), do: Repo.get_by(Email, external_id: external_id)
+
+  @doc """
+  Lists emails for a specific category with pagination and sorting.
+
+  ## Examples
+
+      iex> list_emails_by_category(category_id, %{page: 1, per_page: 10, sort_by: :date, sort_order: :desc})
+      %{entries: [%Email{}, ...], page_number: 1, page_size: 10, total_entries: 20, total_pages: 2}
+  """
+  @spec list_emails_by_category(integer(), map()) :: Scrivener.Page.t(Email.t())
+  def list_emails_by_category(category_id, opts \\ %{}) do
+    page = Map.get(opts, :page, 1)
+    per_page = Map.get(opts, :per_page, 10)
+    sort_by = Map.get(opts, :sort_by, :date)
+    sort_order = Map.get(opts, :sort_order, :desc)
+
+    Email
+    |> where(category_id: ^category_id)
+    |> order_by([{^sort_order, ^sort_by}])
+    |> Repo.paginate(page: page, page_size: per_page)
+  end
+
+  @doc """
+  Deletes multiple emails.
+
+  ## Examples
+
+      iex> delete_emails([1, 2, 3])
+      {3, nil}
+  """
+  @spec delete_emails([integer()]) :: :ok
+  def delete_emails(email_ids) when is_list(email_ids) do
+    Email
+    |> where([e], e.id in ^email_ids)
+    |> Repo.delete_all()
+
+    :ok
+  end
 end
