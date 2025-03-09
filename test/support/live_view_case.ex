@@ -7,6 +7,7 @@ defmodule EmailOrganizerWeb.LiveViewCase do
   use ExUnit.CaseTemplate
 
   alias EmailOrganizer.DataCase
+  alias EmailOrganizer.Support.Factory
 
   using do
     quote do
@@ -25,7 +26,7 @@ defmodule EmailOrganizerWeb.LiveViewCase do
   setup tags do
     DataCase.setup_sandbox(tags)
 
-    user = EmailOrganizer.Support.Factory.insert(:user)
+    user = Factory.insert(:user)
 
     {:ok,
      conn:
@@ -38,7 +39,7 @@ defmodule EmailOrganizerWeb.LiveViewCase do
   Setup helper that registers and logs in users.
   """
   def register_and_log_in_user(%{conn: conn}) do
-    user = EmailOrganizer.Support.Factory.insert(:user)
+    user = Factory.insert(:user)
     %{conn: log_in_user(conn, user), user: user}
   end
 

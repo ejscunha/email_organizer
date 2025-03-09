@@ -7,13 +7,13 @@ defmodule EmailOrganizer.Email do
 
   require Logger
 
-  alias EmailOrganizer.LLM
   alias Ecto.Changeset
   alias EmailOrganizer.Account.User
   alias EmailOrganizer.Email.Category
   alias EmailOrganizer.Email.Email
   alias EmailOrganizer.Email.Subscription
   alias EmailOrganizer.Google.Gmail
+  alias EmailOrganizer.LLM
   alias EmailOrganizer.Repo
 
   @doc """

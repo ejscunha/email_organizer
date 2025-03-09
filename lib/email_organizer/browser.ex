@@ -6,8 +6,8 @@ defmodule EmailOrganizer.Browser do
 
   require Logger
 
-  alias Wallaby.Element
   alias Wallaby.Browser
+  alias Wallaby.Element
   alias Wallaby.Query
 
   @type session :: Wallaby.Session.t()
