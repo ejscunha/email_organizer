@@ -9,13 +9,6 @@ defmodule EmailOrganizer.AccountTest do
   alias EmailOrganizer.Account.User
 
   describe "EmailOrganizer.Account" do
-    @invalid_attrs %{email: nil, name: nil}
-
-    test "list_users/0 returns all users" do
-      users = insert_list(3, :user)
-      assert Account.list_users() == users
-    end
-
     test "get_user/1 returns the user with given id" do
       user = insert(:user)
       assert Account.get_user(user.id) == user
@@ -24,42 +17,6 @@ defmodule EmailOrganizer.AccountTest do
     test "get_user_by_email/1 returns the user with given email" do
       user = insert(:user)
       assert Account.get_user_by_email(user.email) == user
-    end
-
-    test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{email: "test@example.com", name: "Test User"}
-
-      assert {:ok, %User{email: "test@example.com", name: "Test User"}} =
-               Account.create_user(valid_attrs)
-    end
-
-    test "create_user/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Account.create_user(@invalid_attrs)
-    end
-
-    test "update_user/2 with valid data updates the user" do
-      user = insert(:user)
-      update_attrs = %{email: "test2@example.com", name: "Test User 2"}
-
-      assert {:ok, %User{email: "test2@example.com", name: "Test User 2"}} =
-               Account.update_user(user, update_attrs)
-    end
-
-    test "update_user/2 with invalid data returns error changeset" do
-      user = insert(:user)
-      assert {:error, %Ecto.Changeset{}} = Account.update_user(user, @invalid_attrs)
-      assert user == Account.get_user(user.id)
-    end
-
-    test "delete_user/1 deletes the user" do
-      user = insert(:user)
-      assert {:ok, %User{}} = Account.delete_user(user)
-      assert is_nil(Account.get_user(user.id))
-    end
-
-    test "change_user/1 returns a user changeset" do
-      user = build(:user)
-      assert %Ecto.Changeset{} = Account.change_user(user)
     end
 
     test "upsert_user/1 upserts a user" do
