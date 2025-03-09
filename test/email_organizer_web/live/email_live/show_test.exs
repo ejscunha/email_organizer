@@ -4,6 +4,9 @@ defmodule EmailOrganizerWeb.EmailLive.ShowTest do
   """
 
   use EmailOrganizerWeb.LiveViewCase, async: true
+  use Mimic
+
+  alias EmailOrganizer.Email
 
   describe "Show email page" do
     setup %{user: user} do
@@ -61,17 +64,55 @@ defmodule EmailOrganizerWeb.EmailLive.ShowTest do
       assert html =~ category.name
     end
 
-    test "shows unsubscribe message", %{conn: conn, email: email} do
-      {:ok, view, _html} = live(conn, ~p"/emails/#{email.id}")
+    test "can request to unsubscribe from email", %{conn: conn, email: email} do
+      email_id = email.id
+
+      {:ok, view, _html} = live(conn, ~p"/emails/#{email_id}")
+
+      view_pid = view.pid
+
+      expect(Email, :unsubscribe_from_emails, fn [^email_id], ^view_pid -> :ok end)
 
       view
       |> element("button", "Unsubscribe")
       |> render_click()
 
+      assert has_element?(view, "div", "Email will be unsubscribed in the background")
+    end
+
+    test "handles successful unsubscribe notification", %{conn: conn, email: email} do
+      {:ok, view, _html} = live(conn, ~p"/emails/#{email.id}")
+
+      send(view.pid, {:unsubscribed, email})
+
       assert has_element?(
                view,
                "div",
-               "Unsubscribe feature will be implemented in a future update"
+               "Email with subject #{email.subject} unsubscribed successfully"
+             )
+    end
+
+    test "handles no unsubscribe link found notification", %{conn: conn, email: email} do
+      {:ok, view, _html} = live(conn, ~p"/emails/#{email.id}")
+
+      send(view.pid, {:no_unsubscribe_link_found, email})
+
+      assert has_element?(
+               view,
+               "div",
+               "No unsubscribe link found for email with subject #{email.subject}"
+             )
+    end
+
+    test "handles failed unsubscribe notification", %{conn: conn, email: email} do
+      {:ok, view, _html} = live(conn, ~p"/emails/#{email.id}")
+
+      send(view.pid, {:failed_to_unsubscribe, email})
+
+      assert has_element?(
+               view,
+               "div",
+               "Failed to unsubscribe from email with subject #{email.subject}"
              )
     end
   end

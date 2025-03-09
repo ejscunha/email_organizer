@@ -4,6 +4,9 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
   """
 
   use EmailOrganizerWeb.LiveViewCase, async: true
+  use Mimic
+
+  alias EmailOrganizer.Email
 
   describe "Show category page" do
     setup %{user: user} do
@@ -222,6 +225,76 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
       )
 
       assert has_element?(view, "div", "Emails deleted successfully")
+    end
+
+    test "can unsubscribe from selected emails", %{conn: conn, category: category, emails: emails} do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email_id = List.last(emails).id
+      view_pid = view.pid
+
+      expect(Email, :unsubscribe_from_emails, fn [^email_id], ^view_pid -> :ok end)
+
+      view
+      |> element("td[phx-click='select_email'][phx-value-id='#{email_id}']")
+      |> render_click()
+
+      view
+      |> element("button", "Unsubscribe")
+      |> render_click()
+
+      assert has_element?(view, "div", "Emails will be unsubscribed in the background")
+    end
+
+    test "handles successful unsubscribe notification", %{
+      conn: conn,
+      category: category,
+      emails: emails
+    } do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email = List.last(emails)
+      send(view.pid, {:unsubscribed, email})
+
+      assert has_element?(
+               view,
+               "div",
+               "Email with subject #{email.subject} unsubscribed successfully"
+             )
+    end
+
+    test "handles no unsubscribe link found notification", %{
+      conn: conn,
+      category: category,
+      emails: emails
+    } do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email = List.last(emails)
+      send(view.pid, {:no_unsubscribe_link_found, email})
+
+      assert has_element?(
+               view,
+               "div",
+               "No unsubscribe link found for email with subject #{email.subject}"
+             )
+    end
+
+    test "handles failed unsubscribe notification", %{
+      conn: conn,
+      category: category,
+      emails: emails
+    } do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email = List.last(emails)
+      send(view.pid, {:failed_to_unsubscribe, email})
+
+      assert has_element?(
+               view,
+               "div",
+               "Failed to unsubscribe from email with subject #{email.subject}"
+             )
     end
 
     test "can navigate to email details by clicking on a row", %{

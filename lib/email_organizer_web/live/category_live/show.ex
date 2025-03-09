@@ -70,10 +70,11 @@ defmodule EmailOrganizerWeb.CategoryLive.Show do
   end
 
   def handle_event("unsubscribe_selected", _, socket) do
-    # This is a placeholder for future implementation
+    Email.unsubscribe_from_emails(socket.assigns.selected_emails, self())
+
     {:noreply,
      socket
-     |> put_flash(:info, "Unsubscribe feature will be implemented in a future update")
+     |> put_flash(:info, "Emails will be unsubscribed in the background")
      |> assign(:selected_emails, [])}
   end
 
@@ -93,6 +94,22 @@ defmodule EmailOrganizerWeb.CategoryLive.Show do
      |> assign(:sort_by, sort_by)
      |> assign(:sort_order, sort_order)
      |> patch_url()}
+  end
+
+  @impl true
+  def handle_info({:unsubscribed, email}, socket) do
+    {:noreply,
+     put_flash(socket, :info, "Email with subject #{email.subject} unsubscribed successfully")}
+  end
+
+  def handle_info({:no_unsubscribe_link_found, email}, socket) do
+    {:noreply,
+     put_flash(socket, :info, "No unsubscribe link found for email with subject #{email.subject}")}
+  end
+
+  def handle_info({:failed_to_unsubscribe, email}, socket) do
+    {:noreply,
+     put_flash(socket, :error, "Failed to unsubscribe from email with subject #{email.subject}")}
   end
 
   defp fetch_emails(socket) do
