@@ -64,7 +64,8 @@ config :ueberauth, Ueberauth,
       {Ueberauth.Strategy.Google,
        [
          default_scope: "email profile https://www.googleapis.com/auth/gmail.modify",
-         prompt: "select_account"
+         prompt: "select_account",
+         access_type: "offline"
        ]}
   ]
 
