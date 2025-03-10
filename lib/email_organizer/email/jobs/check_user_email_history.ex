@@ -32,7 +32,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistory do
            user_id: user.id,
            email_id: subscription.last_id
          ),
-         {:ok, history} <- Gmail.list_history(user.auth_token, subscription.last_id),
+         {:ok, history} <- Gmail.list_history(user, subscription.last_id),
          Logger.info("Found #{Enum.count(history.message_ids)} new email changes",
            user_id: user.id
          ),

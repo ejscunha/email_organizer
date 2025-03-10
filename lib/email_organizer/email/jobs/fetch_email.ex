@@ -25,7 +25,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmail do
     Logger.info("Fetching email", user_id: user_id, email_id: email_id)
 
     with %User{} = user <- Account.get_user(user_id),
-         {:ok, message} <- Gmail.get_message(user.auth_token, email_id),
+         {:ok, message} <- Gmail.get_message(user, email_id),
          Logger.info("Fetched email message", user_id: user_id, email_id: email_id),
          email_attrs = Map.merge(message, %{user_id: user_id, external_id: email_id}),
          {:ok, _email} <- Email.upsert_email(email_attrs) do

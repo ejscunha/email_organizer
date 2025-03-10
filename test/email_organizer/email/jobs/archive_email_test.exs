@@ -38,9 +38,8 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmailTest do
       email_id = "123"
       user = insert(:user)
       insert(:email, external_id: email_id, user_id: user.id)
-      auth_token = user.auth_token
 
-      expect(Gmail, :archive_email, fn ^auth_token, ^email_id ->
+      expect(Gmail, :archive_email, fn ^user, ^email_id ->
         :ok
       end)
 
@@ -55,7 +54,7 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmailTest do
       user = insert(:user)
       email = insert(:email, external_id: "123", user_id: user.id)
 
-      expect(Gmail, :archive_email, fn _auth_token, _email_id ->
+      expect(Gmail, :archive_email, fn _user, _email_id ->
         {:error, "API Error"}
       end)
 

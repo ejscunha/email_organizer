@@ -25,7 +25,7 @@ defmodule EmailOrganizer.Email.Jobs.ArchiveEmail do
 
     with %EmailRecord{} = email <- Email.get_email_by_external_id(email_id),
          email = Repo.preload(email, :user),
-         :ok <- Gmail.archive_email(email.user.auth_token, email.external_id) do
+         :ok <- Gmail.archive_email(email.user, email.external_id) do
       Logger.info("Email archived", email_id: email_id)
       :ok
     else

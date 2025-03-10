@@ -34,8 +34,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistoryTest do
       message_ids = ["msg1", "msg2", "msg3"]
       new_history_id = 456
 
-      expect(Gmail, :list_history, fn auth_token, last_id ->
-        assert auth_token == user.auth_token
+      expect(Gmail, :list_history, fn ^user, last_id ->
         assert last_id == subscription.last_id
         {:ok, build(:history, message_ids: message_ids, new_history_id: new_history_id)}
       end)
@@ -74,7 +73,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistoryTest do
     end
 
     test "returns error when Gmail API fails", %{user: user} do
-      expect(Gmail, :list_history, fn _auth_token, _last_id ->
+      expect(Gmail, :list_history, fn _user, _last_id ->
         {:error, "API Error"}
       end)
 
@@ -85,7 +84,7 @@ defmodule EmailOrganizer.Email.Jobs.CheckUserEmailHistoryTest do
     end
 
     test "returns error when updating subscription fails", %{user: user} do
-      expect(Gmail, :list_history, fn _auth_token, _last_id ->
+      expect(Gmail, :list_history, fn _user, _last_id ->
         {:ok, build(:history)}
       end)
 

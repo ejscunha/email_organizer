@@ -179,7 +179,7 @@ defmodule EmailOrganizer.Email do
 
   @spec subscribe_user_emails(User.t()) :: :ok | :error
   def subscribe_user_emails(user) do
-    with {:ok, susbscribe_response} <- Gmail.subscribe_user_emails(user.auth_token),
+    with {:ok, susbscribe_response} <- Gmail.subscribe_user_emails(user),
          {:ok, _subscription} <-
            upsert_subscription(%{
              last_id: susbscribe_response.history_id,

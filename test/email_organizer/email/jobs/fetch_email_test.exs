@@ -42,10 +42,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
 
   describe "perform/1" do
     test "fetches email successfully", %{user: user, email_id: email_id} do
-      expect(Gmail, :get_message, fn auth_token, id ->
-        assert auth_token == user.auth_token
-        assert id == email_id
-
+      expect(Gmail, :get_message, fn ^user, ^email_id ->
         {:ok, build(:message, id: email_id)}
       end)
 
@@ -69,7 +66,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
     end
 
     test "returns error when Gmail API fails", %{user: user, email_id: email_id} do
-      expect(Gmail, :get_message, fn _auth_token, _id ->
+      expect(Gmail, :get_message, fn _user, _id ->
         {:error, "API Error"}
       end)
 
@@ -81,7 +78,7 @@ defmodule EmailOrganizer.Email.Jobs.FetchEmailTest do
     end
 
     test "returns cancel when parsing error occurs", %{user: user, email_id: email_id} do
-      expect(Gmail, :get_message, fn _auth_token, _id ->
+      expect(Gmail, :get_message, fn _user, _id ->
         {:error, {:parsing_error, "Invalid format"}}
       end)
 

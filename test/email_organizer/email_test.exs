@@ -148,10 +148,9 @@ defmodule EmailOrganizer.EmailTest do
     end
 
     test "subscribe_user_emails/1 subscribes to Gmail user emails", %{user: user} do
-      auth_token = user.auth_token
       expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
 
-      expect(Gmail, :subscribe_user_emails, fn ^auth_token ->
+      expect(Gmail, :subscribe_user_emails, fn ^user ->
         {:ok, %{history_id: 123, expires_at: expires_at}}
       end)
 
@@ -163,7 +162,7 @@ defmodule EmailOrganizer.EmailTest do
     end
 
     test "subscribe_user_emails/2 returns error when Gmail API fails", %{user: user} do
-      expect(Gmail, :subscribe_user_emails, fn _token ->
+      expect(Gmail, :subscribe_user_emails, fn _user ->
         {:error, "API Error"}
       end)
 
