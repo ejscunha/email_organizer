@@ -81,10 +81,6 @@ config :email_organizer, Oban,
     email_archive: 10
   ]
 
-config :langchain,
-       :openai_key,
-       {EmailOrganizer.Utils, :get_config_value, {:system, "OPENAI_API_KEY"}}
-
 # Add this section for Wallaby configuration
 config :wallaby,
   driver: Wallaby.Chrome,
