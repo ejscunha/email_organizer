@@ -16,7 +16,7 @@ defmodule EmailOrganizer.MixProject do
   def application do
     [
       mod: {EmailOrganizer.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :ex_unit]
     ]
   end
 
