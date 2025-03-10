@@ -38,16 +38,22 @@ defmodule EmailOrganizerWeb.EmailLive.Show do
   @impl true
   def handle_info({:unsubscribed, email}, socket) do
     {:noreply,
-     put_flash(socket, :info, "Email with subject #{email.subject} unsubscribed successfully")}
+     socket
+     |> clear_flash()
+     |> put_flash(:info, "Email with subject #{email.subject} unsubscribed successfully")}
   end
 
   def handle_info({:no_unsubscribe_link_found, email}, socket) do
     {:noreply,
-     put_flash(socket, :info, "No unsubscribe link found for email with subject #{email.subject}")}
+     socket
+     |> clear_flash()
+     |> put_flash(:info, "No unsubscribe link found for email with subject #{email.subject}")}
   end
 
   def handle_info({:failed_to_unsubscribe, email}, socket) do
     {:noreply,
-     put_flash(socket, :error, "Failed to unsubscribe from email with subject #{email.subject}")}
+     socket
+     |> clear_flash()
+     |> put_flash(:error, "Failed to unsubscribe from email with subject #{email.subject}")}
   end
 end

@@ -227,6 +227,23 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
       assert has_element?(view, "div", "Emails deleted successfully")
     end
 
+    test "can delete individual emails", %{conn: conn, category: category, emails: emails} do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email_id = List.last(emails).id
+
+      view
+      |> element("button[phx-click='delete_email'][phx-value-id='#{email_id}']")
+      |> render_click()
+
+      assert has_element?(view, "div", "Email deleted successfully")
+
+      assert_patch(
+        view,
+        ~p"/categories/#{category.id}?page=1&page_size=10&sort_by=date&sort_order=desc"
+      )
+    end
+
     test "can unsubscribe from selected emails", %{conn: conn, category: category, emails: emails} do
       {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
 
@@ -244,6 +261,24 @@ defmodule EmailOrganizerWeb.CategoryLive.ShowTest do
       |> render_click()
 
       assert has_element?(view, "div", "Emails will be unsubscribed in the background")
+    end
+
+    test "can unsubscribe from individual emails", %{
+      conn: conn,
+      category: category,
+      emails: emails
+    } do
+      {:ok, view, _html} = live(conn, ~p"/categories/#{category.id}")
+
+      email_id = List.last(emails).id
+      view_pid = view.pid
+      expect(Email, :unsubscribe_from_emails, fn [^email_id], ^view_pid -> :ok end)
+
+      view
+      |> element("button[phx-click='unsubscribe_email'][phx-value-id='#{email_id}']")
+      |> render_click()
+
+      assert has_element?(view, "div", "Email will be unsubscribed in the background")
     end
 
     test "handles successful unsubscribe notification", %{

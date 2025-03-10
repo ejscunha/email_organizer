@@ -69,6 +69,16 @@ defmodule EmailOrganizerWeb.CategoryLive.Show do
      |> patch_url()}
   end
 
+  def handle_event("delete_email", %{"id" => id}, socket) do
+    id = String.to_integer(id)
+    Email.delete_emails([id])
+
+    {:noreply,
+     socket
+     |> put_flash(:info, "Email deleted successfully")
+     |> patch_url()}
+  end
+
   def handle_event("unsubscribe_selected", _, socket) do
     Email.unsubscribe_from_emails(socket.assigns.selected_emails, self())
 
@@ -76,6 +86,13 @@ defmodule EmailOrganizerWeb.CategoryLive.Show do
      socket
      |> put_flash(:info, "Emails will be unsubscribed in the background")
      |> assign(:selected_emails, [])}
+  end
+
+  def handle_event("unsubscribe_email", %{"id" => id}, socket) do
+    id = String.to_integer(id)
+    Email.unsubscribe_from_emails([id], self())
+
+    {:noreply, put_flash(socket, :info, "Email will be unsubscribed in the background")}
   end
 
   def handle_event("sort", %{"field" => field}, socket) do
@@ -99,17 +116,23 @@ defmodule EmailOrganizerWeb.CategoryLive.Show do
   @impl true
   def handle_info({:unsubscribed, email}, socket) do
     {:noreply,
-     put_flash(socket, :info, "Email with subject #{email.subject} unsubscribed successfully")}
+     socket
+     |> clear_flash()
+     |> put_flash(:info, "Email with subject #{email.subject} unsubscribed successfully")}
   end
 
   def handle_info({:no_unsubscribe_link_found, email}, socket) do
     {:noreply,
-     put_flash(socket, :info, "No unsubscribe link found for email with subject #{email.subject}")}
+     socket
+     |> clear_flash()
+     |> put_flash(:info, "No unsubscribe link found for email with subject #{email.subject}")}
   end
 
   def handle_info({:failed_to_unsubscribe, email}, socket) do
     {:noreply,
-     put_flash(socket, :error, "Failed to unsubscribe from email with subject #{email.subject}")}
+     socket
+     |> clear_flash()
+     |> put_flash(:error, "Failed to unsubscribe from email with subject #{email.subject}")}
   end
 
   defp fetch_emails(socket) do
