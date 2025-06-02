@@ -1,6 +1,10 @@
+# Disclaimer
+
+This was my solution for a challenge to build an app in 72 hours
+
 # Email Organizer
 
-Email Organizer is an Elixir/Phoenix application that helps you organize and categorize your emails from Gmail. It uses machine learning to automatically categorize incoming emails and provides a clean web interface to manage your email subscriptions.
+Email Organizer is an Elixir/Phoenix application that helps you organize and categorize your emails from Gmail. It uses LLM to automatically categorize incoming emails and provides a clean web interface to manage your email subscriptions.
 
 ## Features
 
